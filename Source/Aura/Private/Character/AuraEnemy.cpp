@@ -36,3 +36,11 @@ void AAuraEnemy::UnHighlight()
 	GetMesh()->SetRenderCustomDepth(false);
 	WeaponMesh->SetRenderCustomDepth(false);
 }
+
+void AAuraEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// EnemyはOwnerとAvatarはどちらも自分自身(Character).
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+}
