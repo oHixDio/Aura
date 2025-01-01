@@ -6,7 +6,6 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemInterface.h"
 #include "AttributeSet.h"
-#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Components/SphereComponent.h"
 
