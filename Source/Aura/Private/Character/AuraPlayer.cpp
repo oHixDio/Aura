@@ -6,6 +6,7 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Player/AuraPlayerState.h"
+#include "UI/HUD/AuraHUD.h"
 
 AAuraPlayer::AAuraPlayer()
 {
@@ -25,6 +26,7 @@ void AAuraPlayer::PossessedBy(AController* NewController)
 
 	// ActorInfoをサーバーで設定.
 	InitAbilityActorInfo();
+	
 }
 
 void AAuraPlayer::OnRep_PlayerState()
@@ -42,4 +44,13 @@ void AAuraPlayer::InitAbilityActorInfo()
 	AuraPlayerState->GetAbilitySystemComponent()->InitAbilityActorInfo(AuraPlayerState, this);
 	AbilitySystemComponent = AuraPlayerState->GetAbilitySystemComponent();
 	AttributeSet = AuraPlayerState->GetAttributeSet();
+
+	// LocalでOverlayWidgetを表示する.
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (AAuraHUD* HUD = PlayerController->GetHUD<AAuraHUD>())
+		{
+			HUD->InitOverlay(PlayerController, AuraPlayerState, AbilitySystemComponent, AttributeSet);
+		}
+	}
 }

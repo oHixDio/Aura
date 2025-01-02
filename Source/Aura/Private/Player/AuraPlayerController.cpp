@@ -21,14 +21,27 @@ void AAuraPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// IMCの設定.
+	/**
+	 * LocalPlayerはローカルデバイス上に存在しているため、
+	 * サーバー上でクライアントのPlayerControllerインスタンス生成時にこのラインを通過した際、
+	 * LocalPlayerはnullptrとなる。
+	 * そのため、assertではなく、ifチェックでnullptrチェックを行う.
+	 */
 	check(AuraContext);
-	UEnhancedInputLocalPlayerSubsystem* EnhancedSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	check(EnhancedSubsystem);
-	EnhancedSubsystem->AddMappingContext(AuraContext, 0);
+	if (UEnhancedInputLocalPlayerSubsystem* EnhancedSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		EnhancedSubsystem->AddMappingContext(AuraContext, 0);
+	}
 
+	/**
+	 * カーソル設定!!
+	 * 表示モード.
+	 * Window外に出られる.
+	 * GameとUIに干渉できる.
+	 */
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
-
 	FInputModeGameAndUI InputModeData;
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	InputModeData.SetHideCursorDuringCapture(false);
@@ -61,6 +74,7 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::CursorTrace()
 {
+	// カーソルがHoverしているActorを取得できる便利関数.
 	FHitResult CursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
@@ -70,16 +84,16 @@ void AAuraPlayerController::CursorTrace()
 	
 	/**
 	 * CursorHit結果のシナリオ.
-	 *	A. LastHoverActor null & ThisHoverActor null
+	 *	A. どちらもnull
 	 *		- なにもしない.
-	 *	B. LastHoverActor null & ThisHoverActor valid
-	 *		- Highlight ThisHoverActor
-	 *	C. LastHoverActor valid & ThisHoverActor null
-	 *		- UnHighlight LastHoverActor
-	 *	D. LastHoverActor valid & ThisHoverActor valid & LastHoverActor != ThisHoverActor
-	 *		- Highlight ThisHoverActor
-	 *		  UnHighlight LastHoverActor
-	 *	E. LastHoverActor valid & ThisHoverActor valid & LastHoverActor == ThisHoverActor
+	 *	B. ThisHoverActorだけValid
+	 *		- ThisHoverActorをハイライト
+	 *	C. LastHoverActorだけValid
+	 *		- LastHoverActorをアンハイライト
+	 *	D. どちらもValid　かつ　違うActor
+	 *		- ThisHoverActorをハイライト
+	 *		  LastHoverActorをアンハイライト
+	 *	E. どちらもValid　かつ　同じActor
 	 *		- 何もしない.
 	 */
 	
