@@ -16,6 +16,7 @@ UOverlayWidgetController* AAuraHUD::GetOverlayWidgetControllerInstance(const FWi
 		// WidgetControllerの生成し、Paramsを設定する.
 		OverlayWidgetControllerInstance = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
 		OverlayWidgetControllerInstance->SetWidgetControllerParams(WidgetControllerParams);
+		OverlayWidgetControllerInstance->BindCallbacksToDependencies();
 		
 		return OverlayWidgetControllerInstance;
 	}
@@ -33,6 +34,8 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	const FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
 	UOverlayWidgetController* WidgetController = GetOverlayWidgetControllerInstance(WidgetControllerParams);
 	OverlayWidget->SetWidgetController(WidgetController);
+	// Overlayの初期化とWidgetControllerの値の初期化を紐づける.
+	WidgetController->BroadcastInitialValues();
 	// 表示！
 	OverlayWidget->AddToViewport();
 }

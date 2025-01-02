@@ -7,9 +7,9 @@
 UAuraAttributeSet::UAuraAttributeSet()
 {
 	InitMaxHealth(100.f);
-	InitHealth(MaxHealth.GetBaseValue());
+	InitHealth(25.f);
 	InitMaxMana(100.f);
-	InitMana(MaxMana.GetBaseValue());
+	InitMana(25.F);
 	
 }
 

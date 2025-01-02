@@ -10,3 +10,11 @@ void UWidgetController::SetWidgetControllerParams(const FWidgetControllerParams&
 	AbilitySystemComponent = WidgetControllerParams.AbilitySystemComponent;
 	AttributeSet = WidgetControllerParams.AttributeSet;
 }
+
+void UWidgetController::BroadcastInitialValues()
+{
+}
+
+void UWidgetController::BindCallbacksToDependencies()
+{
+}

@@ -19,27 +19,24 @@ AEffectActor::AEffectActor()
 	Sphere->SetupAttachment(GetRootComponent());
 }
 
-void AEffectActor::OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void AEffectActor::HealthIncrease(AActor* OtherActor, float Value)
 {
-	// TODO: dirty hack! Debug目的で、constであるべきAttributeSetを強制的に非constにして扱っています.
 	if (TScriptInterface<IAbilitySystemInterface> ASIActor = OtherActor)
 	{
 		const UAuraAttributeSet* AttributeSet = Cast<UAuraAttributeSet>(ASIActor->GetAbilitySystemComponent()->GetAttributeSet(UAuraAttributeSet::StaticClass()));
 		UAuraAttributeSet* MutableAttributeSet = const_cast<UAuraAttributeSet*>(AttributeSet);
-		MutableAttributeSet->SetHealth(MutableAttributeSet->GetHealth() + 25.f);
+		MutableAttributeSet->SetHealth(MutableAttributeSet->GetHealth() + Value);
 		Destroy();
 	}
 }
 
-void AEffectActor::OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor)
+void AEffectActor::ManaIncrease(AActor* OtherActor, float Value)
 {
+	if (TScriptInterface<IAbilitySystemInterface> ASIActor = OtherActor)
+	{
+		const UAuraAttributeSet* AttributeSet = Cast<UAuraAttributeSet>(ASIActor->GetAbilitySystemComponent()->GetAttributeSet(UAuraAttributeSet::StaticClass()));
+		UAuraAttributeSet* MutableAttributeSet = const_cast<UAuraAttributeSet*>(AttributeSet);
+		MutableAttributeSet->SetMana(MutableAttributeSet->GetMana() + Value);
+		Destroy();
+	}
 }
-
-void AEffectActor::BeginPlay()
-{
-	Super::BeginPlay();
-
-	OnActorBeginOverlap.AddDynamic(this, &AEffectActor::OnBeginOverlap);
-	OnActorEndOverlap.AddDynamic(this, &AEffectActor::OnEndOverlap);
-}
-

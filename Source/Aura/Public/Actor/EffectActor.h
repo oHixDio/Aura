@@ -16,14 +16,11 @@ class AURA_API AEffectActor : public AActor
 public:	
 	AEffectActor();
 
-	UFUNCTION()
-	virtual void OnBeginOverlap(AActor* OverlappedActor, AActor* OtherActor);
+	UFUNCTION(BlueprintCallable)
+	void HealthIncrease(AActor* OtherActor, float Value);
 	
-	UFUNCTION()
-	virtual void OnEndOverlap(AActor* OverlappedActor, AActor* OtherActor);
-
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION(BlueprintCallable)
+	void ManaIncrease(AActor* OtherActor, float Value);
 
 private:
 	UPROPERTY(VisibleAnywhere)
