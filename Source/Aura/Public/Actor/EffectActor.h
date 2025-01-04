@@ -66,4 +66,7 @@ protected:
 	EEffectRemovalPolicy InfiniteRemovalPolicy{ EEffectRemovalPolicy::RemoveOnEndOverlap };
 
 	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	float ActorLevel{ 1.f };
 };

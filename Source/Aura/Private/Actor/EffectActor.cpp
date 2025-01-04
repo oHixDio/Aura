@@ -21,7 +21,7 @@ void AEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TSubclassOf<UG
 	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
 	EffectContextHandle.AddSourceObject(this);	// 生成元となったオブジェクト(今回はEffectActor)を設定.
 	// GameplayEffectの仕様となるオブジェクトのラッパ.単にGameplayEffectを使用するより最適化されている.
-	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, 1.f, EffectContextHandle);
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, ActorLevel, EffectContextHandle);
 	// TargetにGameplayEffectを適用する.
 	const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());	// ← ラッパからSpecの元データを取得している.
 
