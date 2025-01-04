@@ -13,6 +13,48 @@
 	GAMEPLAYATTRIBUTE_VALUE_SETTER(PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_INITTER(PropertyName)
 
+USTRUCT(BlueprintType)
+struct FEffectProperties
+{
+	GENERATED_BODY()
+
+	FEffectProperties(){}
+	FEffectProperties(
+		FGameplayEffectContextHandle EffectContextHandle,
+		UAbilitySystemComponent* SASC, AActor* SAA, AController* SController, ACharacter* SCharacter,
+		UAbilitySystemComponent* TASC, AActor* TAA, AController* TController, ACharacter* TCharacter)
+		: GameplayEffectContextHandle(EffectContextHandle),
+		  SourceASC(SASC), SourceAvatarActor(SAA), SourceController(SController), SourceCharacter(SCharacter),
+		  TargetASC(TASC), TargetAvatarActor(TAA), TargetController(TController), TargetCharacter(TCharacter){}
+
+	UPROPERTY()
+	FGameplayEffectContextHandle GameplayEffectContextHandle{};
+	
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> SourceASC{};
+
+	UPROPERTY()
+	TObjectPtr<AActor> SourceAvatarActor{};
+
+	UPROPERTY()
+	TObjectPtr<AController> SourceController{};
+
+	UPROPERTY()
+	TObjectPtr<ACharacter> SourceCharacter{};
+	
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> TargetASC{};
+
+	UPROPERTY()
+	TObjectPtr<AActor> TargetAvatarActor{};
+	
+	UPROPERTY()
+	TObjectPtr<AController> TargetController{};
+
+	UPROPERTY()
+	TObjectPtr<ACharacter> TargetCharacter{};
+};
+
 /**
  * 
  */
@@ -32,6 +74,8 @@ public:
 	 * その後に実行される処理によっては再度クランプ処理を行わなければならない可能性がある点に留意が必要です.
 	 */
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+
+	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Galaxy|Attribute")
 	FGameplayAttributeData Health;
@@ -60,4 +104,7 @@ public:
 
 	UFUNCTION()
 	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+
+private:
+	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 };
