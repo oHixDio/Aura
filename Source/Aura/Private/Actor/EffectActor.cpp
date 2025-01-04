@@ -2,41 +2,96 @@
 
 
 #include "Actor/EffectActor.h"
-
+#include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemInterface.h"
-#include "AttributeSet.h"
-#include "AbilitySystem/AuraAttributeSet.h"
-#include "Components/SphereComponent.h"
 
 AEffectActor::AEffectActor()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	SetRootComponent(Mesh);
-	Sphere = CreateDefaultSubobject<USphereComponent>("Sphere");
-	Sphere->SetupAttachment(GetRootComponent());
+	SetRootComponent(CreateDefaultSubobject<USceneComponent>("SceneRoot"));
 }
 
-void AEffectActor::HealthIncrease(AActor* OtherActor, float Value)
+void AEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TSubclassOf<UGameplayEffect> GameplayEffectClass)
 {
-	if (TScriptInterface<IAbilitySystemInterface> ASIActor = OtherActor)
+	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+	if (TargetASC == nullptr) return;	// ← ASCを持っていないActorと接触する可能性がある.
+
+	check(GameplayEffectClass);	// ← GEClassは設定していなくてはならない.
+	FGameplayEffectContextHandle EffectContextHandle = TargetASC->MakeEffectContext();
+	EffectContextHandle.AddSourceObject(this);	// 生成元となったオブジェクト(今回はEffectActor)を設定.
+	// GameplayEffectの仕様となるオブジェクトのラッパ.単にGameplayEffectを使用するより最適化されている.
+	const FGameplayEffectSpecHandle EffectSpecHandle = TargetASC->MakeOutgoingSpec(GameplayEffectClass, 1.f, EffectContextHandle);
+	// TargetにGameplayEffectを適用する.
+	const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());	// ← ラッパからSpecの元データを取得している.
+
+	// InfiniteEffectをRemoveするには保持しなくてはならない.
+	const bool bIsInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
+	if (bIsInfinite && InfiniteRemovalPolicy ==EEffectRemovalPolicy::RemoveOnEndOverlap)
 	{
-		const UAuraAttributeSet* AttributeSet = Cast<UAuraAttributeSet>(ASIActor->GetAbilitySystemComponent()->GetAttributeSet(UAuraAttributeSet::StaticClass()));
-		UAuraAttributeSet* MutableAttributeSet = const_cast<UAuraAttributeSet*>(AttributeSet);
-		MutableAttributeSet->SetHealth(MutableAttributeSet->GetHealth() + Value);
-		Destroy();
+		// Effect毎に複数のActorがそのEffectを実行している可能性があるため、Mapを使用する.
+		ActiveEffectHandles.Add(ActiveGameplayEffectHandle, TargetASC);
 	}
 }
 
-void AEffectActor::ManaIncrease(AActor* OtherActor, float Value)
+void AEffectActor::OnBeginOverlap(AActor* TargetActor)
 {
-	if (TScriptInterface<IAbilitySystemInterface> ASIActor = OtherActor)
+	// BeginOverlapで実行する設定であるGameplayEffectを実行する.
+	
+	if (InstantApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap)
 	{
-		const UAuraAttributeSet* AttributeSet = Cast<UAuraAttributeSet>(ASIActor->GetAbilitySystemComponent()->GetAttributeSet(UAuraAttributeSet::StaticClass()));
-		UAuraAttributeSet* MutableAttributeSet = const_cast<UAuraAttributeSet*>(AttributeSet);
-		MutableAttributeSet->SetMana(MutableAttributeSet->GetMana() + Value);
-		Destroy();
+		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
+	}
+	if (DurationApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
+	}
+	if (InfiniteApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, InfiniteGameplayEffectClass);
+	}
+}
+
+void AEffectActor::OnEndOverlap(AActor* TargetActor)
+{
+	// EndOverlapで実行する設定であるGameplayEffectを実行する.
+	
+	if (InstantApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, InstantGameplayEffectClass);
+	}
+	if (DurationApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, DurationGameplayEffectClass);
+	}
+	if (InfiniteApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)
+	{
+		ApplyEffectToTarget(TargetActor, InfiniteGameplayEffectClass);	// ← RemovalPolicyがEndOverlapの場合、ここで実行されてもすぐに解除される.
+	}
+
+	// Infinite限定の処理.EndOverlapでGameplayEffectが解除される.
+	if (InfiniteRemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap)
+	{
+		UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
+		if (!IsValid(TargetASC)) return;
+		
+		TArray<FActiveGameplayEffectHandle> RemovedEffects;
+
+		// 先ずは解除処理.
+		for (TTuple<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandle : ActiveEffectHandles)
+		{
+			// TargetActor
+			if (ActiveEffectHandle.Value == TargetASC)
+			{
+				TargetASC->RemoveActiveGameplayEffect(ActiveEffectHandle.Key, 1);	// ← 複数スタックされていても、１つだけ解除する.
+				RemovedEffects.Add(ActiveEffectHandle.Key); // ← ここでMapから削除しない理由はforループ中だから.
+			}
+		}
+
+		// 解除したEffectはMapから削除する.
+		for (FActiveGameplayEffectHandle& RemovedEffect : RemovedEffects)
+		{
+			ActiveEffectHandles.FindAndRemoveChecked(RemovedEffect);
+		}
 	}
 }

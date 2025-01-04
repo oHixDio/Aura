@@ -26,6 +26,13 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	/**
+	 * この関数はクランプ処理などといった、単純なことのみを行う.
+	 * CurrentValueを変更前に実行される関数であるため、ここでクランプ処理を行ったとしても、
+	 * その後に実行される処理によっては再度クランプ処理を行わなければならない可能性がある点に留意が必要です.
+	 */
+	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
+
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Galaxy|Attribute")
 	FGameplayAttributeData Health;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health)

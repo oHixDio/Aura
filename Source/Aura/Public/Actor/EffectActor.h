@@ -4,9 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "GameplayEffectTypes.h"
 #include "EffectActor.generated.h"
 
-class USphereComponent;
+
+class UGameplayEffect;
+class UAbilitySystemComponent;
+
+UENUM(BlueprintType)
+enum class EEffectApplicationPolicy : uint8
+{
+	DoNotApply,
+	ApplyOnBeginOverlap,
+	ApplyOnEndOverlap
+};
+
+UENUM(BlueprintType)
+enum class EEffectRemovalPolicy : uint8
+{
+	DoNotRemoval,
+	RemoveOnEndOverlap
+};
 
 UCLASS()
 class AURA_API AEffectActor : public AActor
@@ -16,16 +34,36 @@ class AURA_API AEffectActor : public AActor
 public:	
 	AEffectActor();
 
+protected:
 	UFUNCTION(BlueprintCallable)
-	void HealthIncrease(AActor* OtherActor, float Value);
-	
-	UFUNCTION(BlueprintCallable)
-	void ManaIncrease(AActor* OtherActor, float Value);
+	void ApplyEffectToTarget(AActor* TargetActor, TSubclassOf<UGameplayEffect> GameplayEffectClass);
 
-private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UStaticMeshComponent> Mesh{};
+	UFUNCTION(BlueprintCallable)
+	void OnBeginOverlap(AActor* TargetActor);
+
+	UFUNCTION(BlueprintCallable)
+	void OnEndOverlap(AActor* TargetActor);
 	
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<USphereComponent> Sphere{};
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	EEffectApplicationPolicy InstantApplicationPolicy{ EEffectApplicationPolicy::DoNotApply };
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	EEffectApplicationPolicy DurationApplicationPolicy{ EEffectApplicationPolicy::DoNotApply };
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	EEffectApplicationPolicy InfiniteApplicationPolicy{ EEffectApplicationPolicy::DoNotApply };
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	EEffectRemovalPolicy InfiniteRemovalPolicy{ EEffectRemovalPolicy::RemoveOnEndOverlap };
+
+	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
 };
