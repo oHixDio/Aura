@@ -6,6 +6,9 @@
 #include "AbilitySystemComponent.h"
 #include "AuraAbilitySystemComponent.generated.h"
 
+/** GameplayEffect → AbilitySystemComponent → WidgetController デリゲードを通してEffectからGameplauTags(AssetTags)を取得する. */
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEffectAssetTags, const FGameplayTagContainer&);
+
 /**
  * 
  */
@@ -13,5 +16,12 @@ UCLASS()
 class AURA_API UAuraAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
+
+public:
+	void AbilityActorInfoSet();
+
+	FOnEffectAssetTags OnEffectAssetTags;
 	
+protected:
+	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle);
 };

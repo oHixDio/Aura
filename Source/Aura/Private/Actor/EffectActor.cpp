@@ -25,7 +25,7 @@ void AEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TSubclassOf<UG
 	// TargetにGameplayEffectを適用する.
 	const FActiveGameplayEffectHandle ActiveGameplayEffectHandle = TargetASC->ApplyGameplayEffectSpecToSelf(*EffectSpecHandle.Data.Get());	// ← ラッパからSpecの元データを取得している.
 
-	// InfiniteEffectをRemoveするには保持しなくてはならない.
+	// InfiniteEffectをRemoveするには保持しなくてはならない.F
 	const bool bIsInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
 	if (bIsInfinite && InfiniteRemovalPolicy ==EEffectRemovalPolicy::RemoveOnEndOverlap)
 	{
