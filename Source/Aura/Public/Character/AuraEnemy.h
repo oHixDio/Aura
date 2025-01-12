@@ -26,8 +26,12 @@ public:
 	virtual void Highlight() override;
 	virtual void UnHighlight() override;
 
+	virtual float GetPlayerLevel() const override;
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Level{1.f};
 };

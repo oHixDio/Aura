@@ -37,11 +37,15 @@ void AAuraEnemy::UnHighlight()
 	WeaponMesh->SetRenderCustomDepth(false);
 }
 
+float AAuraEnemy::GetPlayerLevel() const
+{
+	return Level;
+}
+
 void AAuraEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitAbilityActorInfo();
 }
 
 void AAuraEnemy::InitAbilityActorInfo()

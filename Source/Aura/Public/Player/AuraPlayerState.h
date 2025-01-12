@@ -30,4 +30,10 @@ protected:
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
+
+	FORCEINLINE float GetPlayerLevel() const { return Level; }
+	
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Level{1.f};
 };
