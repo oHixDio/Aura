@@ -3,6 +3,7 @@
 
 #include "Character/AuraCharacterBase.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "GameplayEffectTypes.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -26,4 +27,20 @@ void AAuraCharacterBase::InitAbilityActorInfo()
 UAbilitySystemComponent* AAuraCharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& EffectClass, const float Level) const
+{
+	check(GetAbilitySystemComponent());
+	check(EffectClass);
+	const FGameplayEffectContextHandle ContextHandle = GetAbilitySystemComponent()->MakeEffectContext();
+	const FGameplayEffectSpecHandle SpecHandle = GetAbilitySystemComponent()->MakeOutgoingSpec(EffectClass,Level,ContextHandle);
+	GetAbilitySystemComponent()->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data.Get(), GetAbilitySystemComponent());
+}
+
+void AAuraCharacterBase::InitializeDefaultAttributes() const
+{
+	ApplyEffectToSelf(DefaultPrimaryAttributesClass, 1.f);
+	ApplyEffectToSelf(DefaultSecondaryAttributesClass, 1.f);
+	ApplyEffectToSelf(DefaultVitalAttributesClass, 1.f);
 }

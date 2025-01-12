@@ -54,4 +54,6 @@ void AAuraPlayer::InitAbilityActorInfo()
 			HUD->InitOverlay(PlayerController, AuraPlayerState, AbilitySystemComponent, AttributeSet);
 		}
 	}
+
+	InitializeDefaultAttributes();
 }

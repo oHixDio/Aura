@@ -9,6 +9,7 @@
 
 class UAttributeSet;
 class UAbilitySystemComponent;
+class UGameplayEffect;
 
 UCLASS()
 class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInterface
@@ -35,4 +36,17 @@ protected:
 public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributesClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributesClass;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UGameplayEffect> DefaultVitalAttributesClass;
+
+	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& EffectClass, const float Level) const;
+	
+	void InitializeDefaultAttributes() const;
 };

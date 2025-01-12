@@ -21,6 +21,7 @@ public:
 	
 	virtual void OnRep_PlayerState() override;
 
+	
 protected:
 	virtual void InitAbilityActorInfo() override;
 };

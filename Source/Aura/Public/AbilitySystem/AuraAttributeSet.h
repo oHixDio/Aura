@@ -77,33 +77,170 @@ public:
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Galaxy|Attribute")
-	FGameplayAttributeData Health;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health)
+	
+	/*
+	 * Primary Attributes
+	 */
 
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Strength, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Strength;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Strength)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Intelligence, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Intelligence;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Intelligence)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Resilience, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Resilience;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Resilience)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Vigor, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Vigor;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Vigor)
+	
+	UFUNCTION()
+	void OnRep_Strength(const FGameplayAttributeData& OldStrength) const;
+
+	UFUNCTION()
+	void OnRep_Intelligence(const FGameplayAttributeData& OldIntelligence) const;
+
+	UFUNCTION()
+	void OnRep_Resilience(const FGameplayAttributeData& OldResilience) const;
+
+	UFUNCTION()
+	void OnRep_Vigor(const FGameplayAttributeData& OldVigor) const;
+
+	/*
+	 * Secondary Attributes
+	 */
+
+	/*
+	 * Resilienceがベース
+	 * 受けるダメージを減らし、ブロック チャンスを向上させます。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Armor, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Armor;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Armor)
+
+	/*
+	 * Resilienceがベース
+	 * 敵のアーマーの割合を無視して、クリティカル ヒット チャンスを増加させます。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ArmorPenetration, Category = "Galaxy|Attribute")
+	FGameplayAttributeData ArmorPenetration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ArmorPenetration)
+
+	/*
+	 * Armorがベース
+	 * 受けるダメージを半分に減らすチャンス。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_BlockChance, Category = "Galaxy|Attribute")
+	FGameplayAttributeData BlockChance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, BlockChance)
+
+	/*
+	 * ArmorPenetrationがベース
+	 * ダメージが 2 倍になり、クリティカル ヒット ボーナスが加算されるチャンス。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitChance, Category = "Galaxy|Attribute")
+	FGameplayAttributeData CriticalHitChance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitChance)
+
+	/*
+	 * ArmorPenetrationがベース
+	 * クリティカル ヒットが記録されると、ボーナス ダメージが追加されます。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitDamage, Category = "Galaxy|Attribute")
+	FGameplayAttributeData CriticalHitDamage;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitDamage)
+
+	/*
+	 * Armorがベース
+	 * 攻撃する敵のクリティカル ヒット チャンスを減らします。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_CriticalHitResistance, Category = "Galaxy|Attribute")
+	FGameplayAttributeData CriticalHitResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitResistance)
+
+	/*
+	 * Vigorがベース
+	 * 1 秒ごとに回復する体力の量。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_HealthRegeneration, Category = "Galaxy|Attribute")
+	FGameplayAttributeData HealthRegeneration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, HealthRegeneration)
+
+	/*
+	 * Intellegenceがベース
+	 * 1 秒ごとに回復するマナの量。
+	 */
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ManaRegeneration, Category = "Galaxy|Attribute")
+	FGameplayAttributeData ManaRegeneration;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ManaRegeneration)
+
+	/*
+	 * Vigorがベース
+	 * 1 秒ごとに回復するマナの量。
+	 */
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxHealth, Category = "Galaxy|Attribute")
 	FGameplayAttributeData MaxHealth;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxHealth)
 
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Galaxy|Attribute")
-	FGameplayAttributeData Mana;
-	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Mana)
-
+	/*
+	 * Intellegenceがベース
+	 * 獲得できるマナの最大量。
+	 */
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "Galaxy|Attribute")
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxMana)
 
 	UFUNCTION()
-	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
+	void OnRep_Armor(const FGameplayAttributeData& OldArmor) const;
 
+	UFUNCTION()
+	void OnRep_ArmorPenetration(const FGameplayAttributeData& OldArmorPenetration) const;
+
+	UFUNCTION()
+	void OnRep_BlockChance(const FGameplayAttributeData& OldBlockChance) const;
+
+	UFUNCTION()
+	void OnRep_CriticalHitChance(const FGameplayAttributeData& OldCriticalHitChance) const;
+
+	UFUNCTION()
+	void OnRep_CriticalHitDamage(const FGameplayAttributeData& OldCriticalHitDamage) const;
+
+	UFUNCTION()
+	void OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const;
+
+	UFUNCTION()
+	void OnRep_HealthRegeneration(const FGameplayAttributeData& OldHealthRegeneration) const;
+
+	UFUNCTION()
+	void OnRep_ManaRegeneration(const FGameplayAttributeData& OldManaRegeneration) const;
+		
 	UFUNCTION()
 	void OnRep_MaxHealth(const FGameplayAttributeData& OldMaxHealth) const;
 
 	UFUNCTION()
-	void OnRep_Mana(const FGameplayAttributeData& OldMana) const;
+	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+	
+	/*
+	 * Vital Attributes
+	 */
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Health, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Health;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Health)
+
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_Mana, Category = "Galaxy|Attribute")
+	FGameplayAttributeData Mana;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, Mana)
 
 	UFUNCTION()
-	void OnRep_MaxMana(const FGameplayAttributeData& OldMaxMana) const;
+	void OnRep_Health(const FGameplayAttributeData& OldHealth) const;
+
+	UFUNCTION()
+	void OnRep_Mana(const FGameplayAttributeData& OldMana) const;
 
 private:
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
