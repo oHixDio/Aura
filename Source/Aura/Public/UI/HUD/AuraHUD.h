@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "UI/WidgetController/AttributesMenuWidgetController.h"
 #include "AuraHUD.generated.h"
 
 struct FWidgetControllerParams;
@@ -19,15 +20,17 @@ class AURA_API AAuraHUD : public AHUD
 {
 	GENERATED_BODY()
 
+	/*
+	 * Construction Overlay Widget and Overlay Widget Controller
+	 */
 public:
 	UPROPERTY()
 	TObjectPtr<UAuraUserWidget> OverlayWidget{};
 
-	UFUNCTION(BlueprintCallable)
 	UOverlayWidgetController* GetOverlayWidgetControllerInstance(const FWidgetControllerParams& WidgetControllerParams);
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
-	
+
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UAuraUserWidget> OverlayWidgetClass{};
@@ -37,5 +40,21 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Galaxy|UI")
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass{};
+
+
+	
+	/*
+	 * Construction Attributes Menu Widget Controller
+	 */
+public:
+	UAttributesMenuWidgetController* GetAttributesMenuWidgetControllerInstance(const FWidgetControllerParams& WidgetControllerParams);
+
+private:
+	UPROPERTY()
+	TObjectPtr<UAttributesMenuWidgetController> AttributesMenuWidgetControllerInstance{};
+
+	UPROPERTY(EditAnywhere, Category = "Galaxy|UI")
+	TSubclassOf<UAttributesMenuWidgetController> AttributesMenuWidgetControllerClass{};
+
 	
 };

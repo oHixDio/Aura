@@ -17,11 +17,9 @@ UOverlayWidgetController* AAuraHUD::GetOverlayWidgetControllerInstance(const FWi
 		OverlayWidgetControllerInstance = NewObject<UOverlayWidgetController>(this, OverlayWidgetControllerClass);
 		OverlayWidgetControllerInstance->SetWidgetControllerParams(WidgetControllerParams);
 		OverlayWidgetControllerInstance->BindCallbacksToDependencies();
-		
-		return OverlayWidgetControllerInstance;
 	}
 	
-	// Instanceが生成済みの為、そのまま返却.
+	// Instanceが生成済みの場合、そのまま返却.
 	return OverlayWidgetControllerInstance;
 }
 
@@ -38,4 +36,16 @@ void AAuraHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySyst
 	WidgetController->BroadcastInitialValues();
 	// 表示！
 	OverlayWidget->AddToViewport();
+}
+
+UAttributesMenuWidgetController* AAuraHUD::GetAttributesMenuWidgetControllerInstance(const FWidgetControllerParams& WidgetControllerParams)
+{
+	if (AttributesMenuWidgetControllerInstance == nullptr)
+	{
+		checkf(AttributesMenuWidgetControllerClass, TEXT("AttributesMenuWidgetControllerのクラスが設定されていません。BPから設定してください。"));
+		AttributesMenuWidgetControllerInstance = NewObject<UAttributesMenuWidgetController>(this, AttributesMenuWidgetControllerClass);
+		AttributesMenuWidgetControllerInstance->SetWidgetControllerParams(WidgetControllerParams);
+		AttributesMenuWidgetControllerInstance->BindCallbacksToDependencies();
+	}
+	return AttributesMenuWidgetControllerInstance;
 }

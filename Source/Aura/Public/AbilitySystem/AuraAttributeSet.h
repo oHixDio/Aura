@@ -55,6 +55,9 @@ struct FEffectProperties
 	TObjectPtr<ACharacter> TargetCharacter{};
 };
 
+template<class T>
+using TStaticFuncPtr = typename TBaseStaticDelegateInstance<T, FDefaultDelegateUserPolicy>::FFuncPtr;
+
 /**
  * 
  */
@@ -77,6 +80,11 @@ public:
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
+	/*
+	 * GameplayTagとAttributeを関連付けるためのMap.
+	 * 新しいAttributeを作成したときに、コンストラクタで関連付けを怠らない。
+	 */
+	TMap<FGameplayTag, TStaticFuncPtr<FGameplayAttribute()>> TagToAttributes;
 	
 	/*
 	 * Primary Attributes
