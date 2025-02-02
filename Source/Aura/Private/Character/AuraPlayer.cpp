@@ -26,7 +26,7 @@ void AAuraPlayer::PossessedBy(AController* NewController)
 
 	// ActorInfoをサーバーで設定.
 	InitAbilityActorInfo();
-	
+	AddCharacterAbilities();
 }
 
 void AAuraPlayer::OnRep_PlayerState()

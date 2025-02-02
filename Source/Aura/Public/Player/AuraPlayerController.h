@@ -3,12 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/PlayerController.h"
 #include "Interaction/Highlightable.h"
 #include "AuraPlayerController.generated.h"
 
+class UAuraInputConfig;
 class UInputMappingContext;
 class UInputAction;
+class UAuraAbilitySystemComponent;
 struct FInputActionValue;
 /**
  * 
@@ -17,7 +20,9 @@ UCLASS()
 class AURA_API AAuraPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
+	
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Super member.
 public:
 	AAuraPlayerController();
 
@@ -27,6 +32,20 @@ protected:
 
 	virtual void SetupInputComponent() override;
 
+
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Core member.
+public:
+	UAuraAbilitySystemComponent* GetASC();
+
+private:
+	UPROPERTY()
+	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent{};
+
+	
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Input member.
 private:
 	UPROPERTY(EditAnywhere, Category = "Aura|Input")
 	TObjectPtr<UInputMappingContext> AuraContext{};
@@ -34,9 +53,19 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Aura|Input")
 	TObjectPtr<UInputAction> MoveAction{};
 
+	UPROPERTY(EditAnywhere, Category = "Aura|Input")
+	TObjectPtr<UAuraInputConfig> InputConfig{};
+
 	void Move(const FInputActionValue& InputActionValue);
 
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHeld(FGameplayTag InputTag);
 
+
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// HighLight member.
 	TScriptInterface<IHighlightable> LastHoverActor{};
 	TScriptInterface<IHighlightable> ThisHoverActor{};
 	

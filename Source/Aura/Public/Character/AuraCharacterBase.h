@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UGameplayAbility;
 class UAttributeSet;
 class UAbilitySystemComponent;
 class UGameplayEffect;
@@ -17,15 +18,29 @@ class AURA_API AAuraCharacterBase : public ACharacter, public IAbilitySystemInte
 {
 	GENERATED_BODY()
 
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Super member.
 public:
 	AAuraCharacterBase();
 
 protected:
 	virtual void BeginPlay() override;
 
+
+	
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Core member.
+public:
+	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& EffectClass, const float Level) const;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
+	
+protected:
 	virtual void InitAbilityActorInfo();
 
-	UPROPERTY(EditAnywhere, Category = "Aura|Component")
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh{};
 
 	UPROPERTY()
@@ -34,20 +49,31 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
 
-public:
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
-	UPROPERTY(EditAnywhere)
+	
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Initialize Attributes member.
+public:
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributesClass;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributesClass;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributesClass;
 
-	void ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& EffectClass, const float Level) const;
-	
 	void InitializeDefaultAttributes() const;
+
+	
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Initialize Abilities member.
+protected:
+	/** StartupAbilitiesをキャラクターに付与する. */
+	void AddCharacterAbilities() const;
+	
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "CharacterBase")
+	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 };

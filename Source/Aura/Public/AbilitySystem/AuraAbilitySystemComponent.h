@@ -21,6 +21,13 @@ public:
 	void AbilityActorInfoSet();
 
 	FOnEffectAssetTags OnEffectAssetTags;
+
+	/** StartupAbilitiesをキャラクターに付与する. */
+	void AddCharacterAbilities(const TArray<TSubclassOf<UGameplayAbility>>& Abilities);
+
+	void AbilityInputTagReleased(const FGameplayTag& InputTag);
+	
+	void AbilityInputTagHeld(const FGameplayTag& InputTag);
 	
 protected:
 	void EffectApplied(UAbilitySystemComponent* AbilitySystemComponent, const FGameplayEffectSpec& EffectSpec, FActiveGameplayEffectHandle ActiveEffectHandle) const;
