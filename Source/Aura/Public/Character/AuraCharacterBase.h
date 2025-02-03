@@ -36,6 +36,8 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
+
+	virtual FVector GetCombatSocketLocation() const override;
 	
 protected:
 	virtual void InitAbilityActorInfo();
@@ -48,6 +50,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UAttributeSet> AttributeSet;
+
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	FName WeaponTipSocketName{};
 
 
 	

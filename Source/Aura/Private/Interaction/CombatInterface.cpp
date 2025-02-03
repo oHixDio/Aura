@@ -8,3 +8,8 @@ float ICombatInterface::GetPlayerLevel() const
 {
 	return 0.f;
 }
+
+FVector ICombatInterface::GetCombatSocketLocation() const
+{
+	return FVector::ZeroVector;
+}
