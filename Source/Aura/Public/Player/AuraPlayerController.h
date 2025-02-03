@@ -8,6 +8,7 @@
 #include "Interaction/Highlightable.h"
 #include "AuraPlayerController.generated.h"
 
+class USplineComponent;
 class UAuraInputConfig;
 class UInputMappingContext;
 class UInputAction;
@@ -66,8 +67,27 @@ private:
 
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// HighLight member.
+private:
 	TScriptInterface<IHighlightable> LastHoverActor{};
 	TScriptInterface<IHighlightable> ThisHoverActor{};
 	
 	void CursorTrace();
+
+
+	
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Click to move member.
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USplineComponent> Spline{};
+
+	UPROPERTY(EditDefaultsOnly)
+	float AutoRunAcceptanceRadius{50.f};
+
+	float FollowTime{};
+	float ShortPressThreshold{0.5f};
+	FVector CashedDestination{};
+	bool bAutoRunning{false};
+	/** EnemyなどのTarget対象にカーソルがホバーしているか否かを判定. */
+	bool bTargeting{false};
 };

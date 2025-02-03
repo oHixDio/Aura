@@ -6,11 +6,17 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Components/SplineComponent.h"
 #include "Input/AuraInputComponent.h"
+#include "AuraGameplayTags.h"
+#include "NavigationPath.h"
+#include "NavigationSystem.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
 	bReplicates = true;
+
+	Spline = CreateDefaultSubobject<USplineComponent>("Spline");
 }
 
 void AAuraPlayerController::PlayerTick(float DeltaTime)
@@ -62,10 +68,12 @@ void AAuraPlayerController::SetupInputComponent()
 
 UAuraAbilitySystemComponent* AAuraPlayerController::GetASC()
 {
+	// UAuraAbilitySystemComponentにキャストして返却.
 	if (AuraAbilitySystemComponent == nullptr)
 	{
 		AuraAbilitySystemComponent = Cast<UAuraAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()));
 	}
+	// 既にキャスト済みならそのまま返却.
 	return AuraAbilitySystemComponent;
 }
 
@@ -87,19 +95,85 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	// GEngine->AddOnScreenDebugMessage(1, 5, FColor::Green, *InputTag.ToString());
+	// 左マウスボタン押下時の処理.
+	if (InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB))
+	{
+		bTargeting = ThisHoverActor ? true : false;
+		bAutoRunning = false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (GetASC() == nullptr) return;
-	GetASC()->AbilityInputTagReleased(InputTag);
+	bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
+	if (!bByLMB || bTargeting)
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagReleased(InputTag);
+		}
+		return;
+	}
+
+	// 移動処理！	
+	if (!bTargeting)
+	{
+		APawn* ControlledPawn = GetPawn<APawn>();
+		// Press時間が閾値以下ならClickToMove！
+		if (ControlledPawn && FollowTime <= ShortPressThreshold)
+		{
+			// Pawnの現在座標から、押下時のマウス座標までのPathを取得する.
+			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CashedDestination))
+			{
+				// Splineに新しいPathPointsを代入.
+				Spline->ClearSplinePoints();
+				for (FVector& PathLoc : NavPath->PathPoints)
+				{
+					Spline->AddSplinePoint(PathLoc, ESplineCoordinateSpace::World);
+					DrawDebugSphere(GetWorld(),PathLoc, 8.f, 8, FColor::Orange, false, 5.f);
+				}
+				bAutoRunning = true;	// AutoRun状態に.
+			}
+		}
+		// Hold時の情報クリア.
+		FollowTime = 0.f;
+		bTargeting = false;
+	}
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (GetASC() == nullptr) return;
-	GetASC()->AbilityInputTagHeld(InputTag);
+	bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
+	if (!bByLMB || bTargeting)
+	{
+		if (GetASC())
+		{
+			GetASC()->AbilityInputTagHeld(InputTag);
+		}
+		return;
+	}
+
+	// Target対象をホバーしていない.Moveするぞ！
+	if (!bTargeting)
+	{
+		// Hold Timeを測る.
+		FollowTime += GetWorld()->GetDeltaSeconds();
+
+		// マウスの座標取得.
+		FHitResult Hit;
+		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
+		if (Hit.bBlockingHit)
+		{
+			CashedDestination = Hit.ImpactPoint;
+		}
+
+		// 移動.
+		if (APawn* ControlledPawn = GetPawn<APawn>())
+		{
+			FVector WorldDirection = (CashedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+			ControlledPawn->AddMovementInput(WorldDirection);	// Rep対応.
+		}
+	}
 }
 
 void AAuraPlayerController::CursorTrace()
