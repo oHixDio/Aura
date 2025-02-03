@@ -70,6 +70,8 @@ private:
 private:
 	TScriptInterface<IHighlightable> LastHoverActor{};
 	TScriptInterface<IHighlightable> ThisHoverActor{};
+
+	FHitResult CursorHit;
 	
 	void CursorTrace();
 
@@ -81,6 +83,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USplineComponent> Spline{};
 
+	/** 現在位置から目的地までの距離が、この値を下回ったら自動Runを終了する. */
 	UPROPERTY(EditDefaultsOnly)
 	float AutoRunAcceptanceRadius{50.f};
 
@@ -90,4 +93,6 @@ private:
 	bool bAutoRunning{false};
 	/** EnemyなどのTarget対象にカーソルがホバーしているか否かを判定. */
 	bool bTargeting{false};
+
+	void AutoRun();
 };

@@ -24,6 +24,7 @@ void AAuraPlayerController::PlayerTick(float DeltaTime)
 	Super::PlayerTick(DeltaTime);
 
 	CursorTrace();
+	AutoRun();
 }
 
 void AAuraPlayerController::BeginPlay()
@@ -105,20 +106,17 @@ void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
+	const bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
 	if (!bByLMB || bTargeting)
 	{
-		if (GetASC())
-		{
-			GetASC()->AbilityInputTagReleased(InputTag);
-		}
+		if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
 		return;
 	}
 
 	// 移動処理！	
 	if (!bTargeting)
 	{
-		APawn* ControlledPawn = GetPawn<APawn>();
+		const APawn* ControlledPawn = GetPawn<APawn>();
 		// Press時間が閾値以下ならClickToMove！
 		if (ControlledPawn && FollowTime <= ShortPressThreshold)
 		{
@@ -130,8 +128,8 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 				for (FVector& PathLoc : NavPath->PathPoints)
 				{
 					Spline->AddSplinePoint(PathLoc, ESplineCoordinateSpace::World);
-					DrawDebugSphere(GetWorld(),PathLoc, 8.f, 8, FColor::Orange, false, 5.f);
 				}
+				if (!NavPath->PathPoints.IsEmpty()) CashedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
 				bAutoRunning = true;	// AutoRun状態に.
 			}
 		}
@@ -143,13 +141,10 @@ void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
+	const bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
 	if (!bByLMB || bTargeting)
 	{
-		if (GetASC())
-		{
-			GetASC()->AbilityInputTagHeld(InputTag);
-		}
+		if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
 		return;
 	}
 
@@ -160,12 +155,7 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 		FollowTime += GetWorld()->GetDeltaSeconds();
 
 		// マウスの座標取得.
-		FHitResult Hit;
-		GetHitResultUnderCursor(ECC_Visibility, false, Hit);
-		if (Hit.bBlockingHit)
-		{
-			CashedDestination = Hit.ImpactPoint;
-		}
+		if (CursorHit.bBlockingHit) CashedDestination = CursorHit.ImpactPoint;
 
 		// 移動.
 		if (APawn* ControlledPawn = GetPawn<APawn>())
@@ -179,45 +169,36 @@ void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 void AAuraPlayerController::CursorTrace()
 {
 	// カーソルがHoverしているActorを取得できる便利関数.
-	FHitResult CursorHit;
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 
 	LastHoverActor = ThisHoverActor;
 	ThisHoverActor = CursorHit.GetActor();
 	
-	/**
-	 * CursorHit結果のシナリオ.
-	 *	A. どちらもnull
-	 *		- なにもしない.
-	 *	B. ThisHoverActorだけValid
-	 *		- ThisHoverActorをハイライト
-	 *	C. LastHoverActorだけValid
-	 *		- LastHoverActorをアンハイライト
-	 *	D. どちらもValid　かつ　違うActor
-	 *		- ThisHoverActorをハイライト
-	 *		  LastHoverActorをアンハイライト
-	 *	E. どちらもValid　かつ　同じActor
-	 *		- 何もしない.
-	 */
-	
-	if (LastHoverActor == nullptr && ThisHoverActor == nullptr)
-	{/* A */
+	if (LastHoverActor != ThisHoverActor)
+	{
+		if (LastHoverActor) LastHoverActor->UnHighlight();
+		if (ThisHoverActor) ThisHoverActor->Highlight();
 	}
-	else if (LastHoverActor == nullptr && ThisHoverActor)
-	{/* B */
-		ThisHoverActor->Highlight();
-	}
-	else if (LastHoverActor && ThisHoverActor == nullptr)
-	{/* C */
-		LastHoverActor->UnHighlight();
-	}
-	else if (LastHoverActor && ThisHoverActor && LastHoverActor != ThisHoverActor)
-	{/* D */
-		LastHoverActor->UnHighlight();
-		ThisHoverActor->Highlight();
-	}
-	else if (LastHoverActor && ThisHoverActor && LastHoverActor == ThisHoverActor)
-	{/* E */
+}
+
+void AAuraPlayerController::AutoRun()
+{
+	if (!bAutoRunning) return;
+
+	if (APawn* ControlledPawn = GetPawn<APawn>())
+	{
+		// 現在座標からSpline座標の中で一番近いLocation取得.
+		FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		// SplineLocationまでの移動を取得.
+		FVector WorldDirection = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		ControlledPawn->AddMovementInput(WorldDirection);
+
+		// Mouse押下Locationまでの距離がAutoRun許可範囲を下回ったら、AutoRunを止める.
+		const float DistanceToDestination = (LocationOnSpline - CashedDestination).Length();
+		if (DistanceToDestination <= AutoRunAcceptanceRadius)
+		{
+			bAutoRunning = false;
+		}
 	}
 }
