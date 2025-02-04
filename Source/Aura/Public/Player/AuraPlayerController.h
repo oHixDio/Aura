@@ -53,11 +53,23 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Aura|Input")
 	TObjectPtr<UInputAction> MoveAction{};
+	
+	UPROPERTY(EditAnywhere, Category = "Aura|Input")
+	TObjectPtr<UInputAction> ShiftAction{};
 
 	UPROPERTY(EditAnywhere, Category = "Aura|Input")
 	TObjectPtr<UAuraInputConfig> InputConfig{};
 
+	bool bShiftPressed{false};
+	
 	void Move(const FInputActionValue& InputActionValue);
+
+	void ClickToMoveByPressed();
+	void ClickToMoveByReleased();
+	void ClickToMoveByHeld();
+
+	void ShiftPressed() { bShiftPressed = true; };
+	void ShiftReleased() { bShiftPressed = false; };
 
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);

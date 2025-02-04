@@ -11,18 +11,26 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
                                            const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	//
+}
 
-	if (!HasAuthority(&ActivationInfo)) return;
-
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+{
+	// Avatar => Pawn.
+	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
+	
 	check(ProjectileClass);
 
 	if (TScriptInterface<ICombatInterface> CombatActor = GetAvatarActorFromActorInfo())
 	{
+		const FVector SpawnLocation = CombatActor->GetCombatSocketLocation();
+		FRotator SpawnRotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
+		// 地面と水平に飛ばす.
+		SpawnRotation.Pitch = 0.f;
 		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(CombatActor->GetCombatSocketLocation());
+		SpawnTransform.SetLocation(SpawnLocation);
+		SpawnTransform.SetRotation(SpawnRotation.Quaternion());
 
-		// TODO: 適切なRotationを与える.
-		
 		AAuraProjectile* AuraProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
 			ProjectileClass,
 			SpawnTransform,

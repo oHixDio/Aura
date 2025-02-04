@@ -31,12 +31,8 @@ void AAuraPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// IMCの設定.
-	/**
-	 * LocalPlayerはローカルデバイス上に存在しているため、
-	 * サーバー上でクライアントのPlayerControllerインスタンス生成時にこのラインを通過した際、
-	 * LocalPlayerはnullptrとなる。
-	 * そのため、assertではなく、ifチェックでnullptrチェックを行う.
+	/*
+	 *	InputMappingContextの設定！！
 	 */
 	check(AuraContext);
 	if (UEnhancedInputLocalPlayerSubsystem* EnhancedSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -44,11 +40,8 @@ void AAuraPlayerController::BeginPlay()
 		EnhancedSubsystem->AddMappingContext(AuraContext, 0);
 	}
 
-	/**
-	 * カーソル設定!!
-	 * 表示モード.
-	 * Window外に出られる.
-	 * GameとUIに干渉できる.
+	/*
+	 * カーソルの設定！！
 	 */
 	bShowMouseCursor = true;
 	DefaultMouseCursor = EMouseCursor::Default;
@@ -62,8 +55,13 @@ void AAuraPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	/*
+	 *	InputAction 設定！
+	 */
 	UAuraInputComponent* AuraInputComponent = CastChecked<UAuraInputComponent>(InputComponent);
 	AuraInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AAuraPlayerController::Move);
+	AuraInputComponent->BindAction(ShiftAction,ETriggerEvent::Started, this, &AAuraPlayerController::ShiftPressed);
+	AuraInputComponent->BindAction(ShiftAction,ETriggerEvent::Completed, this, &AAuraPlayerController::ShiftReleased);
 	AuraInputComponent->BindAbilityAction(InputConfig, this, &ThisClass::AbilityInputTagPressed, &ThisClass::AbilityInputTagReleased, &ThisClass::AbilityInputTagHeld);
 }
 
@@ -94,76 +92,82 @@ void AAuraPlayerController::Move(const FInputActionValue& InputActionValue)
 	}
 }
 
+void AAuraPlayerController::ClickToMoveByPressed()
+{
+	bTargeting = ThisHoverActor ? true : false;
+	bAutoRunning = false;
+}
+
+void AAuraPlayerController::ClickToMoveByReleased()
+{
+	const APawn* ControlledPawn = GetPawn<APawn>();
+	// Press時間が閾値以下ならClickToMove！
+	if (ControlledPawn && FollowTime <= ShortPressThreshold)
+	{
+		// Pawnの現在座標から、押下時のマウス座標までのPathを取得する.
+		if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CashedDestination))
+		{
+			// Splineに新しいPathPointsを代入.
+			Spline->ClearSplinePoints();
+			for (FVector& PathLoc : NavPath->PathPoints)
+			{
+				Spline->AddSplinePoint(PathLoc, ESplineCoordinateSpace::World);
+			}
+			if (!NavPath->PathPoints.IsEmpty()) CashedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+			bAutoRunning = true;	// AutoRun状態に.
+		}
+	}
+	// Hold時の情報クリア.
+	FollowTime = 0.f;
+	bTargeting = false;
+}
+
+void AAuraPlayerController::ClickToMoveByHeld()
+{
+	// Hold Timeを測る.
+	FollowTime += GetWorld()->GetDeltaSeconds();
+
+	// マウスの座標取得.
+	if (CursorHit.bBlockingHit) CashedDestination = CursorHit.ImpactPoint;
+
+	// 移動.
+	if (APawn* ControlledPawn = GetPawn<APawn>())
+	{
+		FVector WorldDirection = (CashedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
+		ControlledPawn->AddMovementInput(WorldDirection);	// Rep対応.
+	}
+}
+
 void AAuraPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	// 左マウスボタン押下時の処理.
 	if (InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB))
 	{
-		bTargeting = ThisHoverActor ? true : false;
-		bAutoRunning = false;
+		ClickToMoveByPressed();
 	}
 }
 
 void AAuraPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	const bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
-	if (!bByLMB || bTargeting)
+	if (!bByLMB || bTargeting || bShiftPressed)
 	{
 		if (GetASC()) GetASC()->AbilityInputTagReleased(InputTag);
 		return;
 	}
 
-	// 移動処理！	
-	if (!bTargeting)
-	{
-		const APawn* ControlledPawn = GetPawn<APawn>();
-		// Press時間が閾値以下ならClickToMove！
-		if (ControlledPawn && FollowTime <= ShortPressThreshold)
-		{
-			// Pawnの現在座標から、押下時のマウス座標までのPathを取得する.
-			if (UNavigationPath* NavPath = UNavigationSystemV1::FindPathToLocationSynchronously(this, ControlledPawn->GetActorLocation(), CashedDestination))
-			{
-				// Splineに新しいPathPointsを代入.
-				Spline->ClearSplinePoints();
-				for (FVector& PathLoc : NavPath->PathPoints)
-				{
-					Spline->AddSplinePoint(PathLoc, ESplineCoordinateSpace::World);
-				}
-				if (!NavPath->PathPoints.IsEmpty()) CashedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
-				bAutoRunning = true;	// AutoRun状態に.
-			}
-		}
-		// Hold時の情報クリア.
-		FollowTime = 0.f;
-		bTargeting = false;
-	}
+	ClickToMoveByReleased();
 }
 
 void AAuraPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	const bool bByLMB = InputTag.IsValid() && InputTag.MatchesTagExact(FAuraGameplayTags::Get().Input_LMB);
-	if (!bByLMB || bTargeting)
+	if (!bByLMB || bTargeting || bShiftPressed)
 	{
 		if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
 		return;
 	}
 
-	// Target対象をホバーしていない.Moveするぞ！
-	if (!bTargeting)
-	{
-		// Hold Timeを測る.
-		FollowTime += GetWorld()->GetDeltaSeconds();
-
-		// マウスの座標取得.
-		if (CursorHit.bBlockingHit) CashedDestination = CursorHit.ImpactPoint;
-
-		// 移動.
-		if (APawn* ControlledPawn = GetPawn<APawn>())
-		{
-			FVector WorldDirection = (CashedDestination - ControlledPawn->GetActorLocation()).GetSafeNormal();
-			ControlledPawn->AddMovementInput(WorldDirection);	// Rep対応.
-		}
-	}
+	ClickToMoveByHeld();
 }
 
 void AAuraPlayerController::CursorTrace()

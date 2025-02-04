@@ -21,4 +21,7 @@ protected:
 private:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AAuraProjectile> ProjectileClass;
+
+	UFUNCTION(BlueprintCallable)
+	void SpawnProjectile(const FVector& ProjectileTargetLocation);
 };
