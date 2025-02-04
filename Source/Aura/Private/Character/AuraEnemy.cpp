@@ -7,7 +7,6 @@
 
 AAuraEnemy::AAuraEnemy()
 {
-	GetMesh()->SetCollisionResponseToChannel(ECC_Visibility,ECR_Block);
 	GetMesh()->SetCustomDepthStencilValue(250);
 	WeaponMesh->SetCustomDepthStencilValue(250);
 
@@ -53,4 +52,6 @@ void AAuraEnemy::InitAbilityActorInfo()
 	// EnemyはOwnerとAvatarはどちらも自分自身(Character).
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+
+	InitializeDefaultAttributes();
 }
