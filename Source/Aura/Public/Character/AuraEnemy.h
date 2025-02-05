@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
+#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/Highlightable.h"
 #include "AuraEnemy.generated.h"
 
@@ -34,9 +35,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
+	virtual void InitializeDefaultAttributes() const override;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
 	float Level{1.f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
+	ECharacterClass CharacterClass{ECharacterClass::Warrior};
 
 	UPROPERTY()
 	TObjectPtr<UEnemyWidgetController> EnemyWidgetController{};

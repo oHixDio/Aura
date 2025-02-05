@@ -68,7 +68,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributesClass;
 
-	void InitializeDefaultAttributes() const;
+	virtual void InitializeDefaultAttributes() const;
 
 	
 

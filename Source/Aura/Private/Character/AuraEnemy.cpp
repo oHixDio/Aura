@@ -3,6 +3,7 @@
 
 #include "Character/AuraEnemy.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
+#include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "Components/WidgetComponent.h"
 #include "UI/WidgetController/EnemyWidgetController.h"
@@ -64,6 +65,11 @@ void AAuraEnemy::InitAbilityActorInfo()
 
 	InitializeDefaultAttributes();
 	InitEnemyWidget();
+}
+
+void AAuraEnemy::InitializeDefaultAttributes() const
+{
+	UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
 
 UEnemyWidgetController* AAuraEnemy::GetEnemyWidgetController()
