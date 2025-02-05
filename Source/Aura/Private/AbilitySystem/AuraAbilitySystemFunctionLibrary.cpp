@@ -52,20 +52,25 @@ void UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(const UObjec
 	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
 	if (GameMode == nullptr) return;
 
+	// SourceActorを用意.
 	const AActor* AvatarActor = AbilitySystemComponent->GetAvatarActor();
+	// CharacterClassからClassに適したInit情報取得.
 	const UCharacterClassInfo* CharacterClassInfo = GameMode->CharacterClassInfo;
 	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
 
+	// Primary属性の初期化.
 	FGameplayEffectContextHandle PrimaryContextHandle = AbilitySystemComponent->MakeEffectContext();
-	PrimaryContextHandle.AddSourceObject(AvatarActor);
+	PrimaryContextHandle.AddSourceObject(AvatarActor);	// 重要.
 	const FGameplayEffectSpecHandle PrimaryAttributesSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(ClassDefaultInfo.PrimaryAttributesEffectClass, Level, PrimaryContextHandle);
 	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*PrimaryAttributesSpecHandle.Data.Get());
 
+	// Secondary属性の初期化.
 	FGameplayEffectContextHandle SecondaryContextHandle = AbilitySystemComponent->MakeEffectContext();
 	SecondaryContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle SecondaryAttributesSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(CharacterClassInfo->SecondaryAttributesEffectClass, Level, SecondaryContextHandle);
 	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*SecondaryAttributesSpecHandle.Data.Get());
 
+	// Vital属性の初期化.
 	FGameplayEffectContextHandle VitalContextHandle = AbilitySystemComponent->MakeEffectContext();
 	VitalContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle VitalAttributesSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(CharacterClassInfo->VitalAttributesEffectClass, Level, VitalContextHandle);

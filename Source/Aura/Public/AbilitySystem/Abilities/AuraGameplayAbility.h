@@ -19,6 +19,9 @@ public:
 	 * Inputタグを設定する.
 	 * このGameplayAbilityをActiveにする為のInputActionを選択できる.
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aura")
 	FGameplayTag StartupInputTag{};
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aura")
+	FScalableFloat Damage{};
 };

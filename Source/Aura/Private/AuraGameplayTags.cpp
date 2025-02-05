@@ -46,4 +46,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Input_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.4"), FString("Input Tag for 4 key"));
 	Instance.Input_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.LMB"), FString("Input Tag for Left mouse button"));
 	Instance.Input_RMB = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.RMB"), FString("Input Tag for Right mouse button"));
+
+	/**
+	 * Damage
+	 */
+	Instance.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage"), FString("Damage"));
 }

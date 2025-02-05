@@ -5,6 +5,7 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AuraGameplayTags.h"
 #include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
 
@@ -42,9 +43,14 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		);
 
 		// DamageEffectを作成してProjectileに渡す.
-		if (UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo()))
+		if (const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo()))
 		{
-			AuraProjectile->DamageEffectSpecHandle= SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), SourceASC->MakeEffectContext());
+			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), SourceASC->MakeEffectContext());
+			// SetByCallerにDamageをKeyとしてDamage値を与える.
+			const float ScaledDamage = Damage.GetValueAtLevel(GetAbilityLevel());
+			GEngine->AddOnScreenDebugMessage(-1, 3,FColor::Black, FString::Printf(TEXT("Damage: %f"), ScaledDamage));
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, FAuraGameplayTags::Get().Damage, ScaledDamage);
+			AuraProjectile->DamageEffectSpecHandle = SpecHandle;
 		}	
 		
 		AuraProjectile->FinishSpawning(SpawnTransform);

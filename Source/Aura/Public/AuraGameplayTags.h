@@ -52,6 +52,8 @@ public:
 	FGameplayTag Input_4;
 	FGameplayTag Input_LMB;
 	FGameplayTag Input_RMB;
+
+	FGameplayTag Damage;
 	
 	
 private:
