@@ -4,11 +4,20 @@
 #include "Character/AuraEnemy.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "Components/WidgetComponent.h"
+#include "UI/WidgetController/EnemyWidgetController.h"
+#include "Components/CapsuleComponent.h"
+#include "UI/Widget/AuraUserWidget.h"
 
 AAuraEnemy::AAuraEnemy()
 {
 	GetMesh()->SetCustomDepthStencilValue(250);
 	WeaponMesh->SetCustomDepthStencilValue(250);
+
+	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>("HealthBarWidget");
+	HealthBarWidget->SetupAttachment(GetCapsuleComponent());
+	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
+	HealthBarWidget->SetDrawAtDesiredSize(true);
 
 	AbilitySystemComponent = CreateDefaultSubobject<UAuraAbilitySystemComponent>("AbilitySystemComponent");
 	AbilitySystemComponent->SetIsReplicated(true);
@@ -54,4 +63,28 @@ void AAuraEnemy::InitAbilityActorInfo()
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
 	InitializeDefaultAttributes();
+	InitEnemyWidget();
+}
+
+UEnemyWidgetController* AAuraEnemy::GetEnemyWidgetController()
+{
+	if (EnemyWidgetController == nullptr)
+	{
+		check(EnemyWidgetControllerClass);
+		EnemyWidgetController = NewObject<UEnemyWidgetController>(this, EnemyWidgetControllerClass);
+		const FWidgetControllerParams WidgetControllerParams(nullptr, nullptr, AbilitySystemComponent, AttributeSet);
+		EnemyWidgetController->SetWidgetControllerParams(WidgetControllerParams);
+		EnemyWidgetController->BindCallbacksToDependencies();
+	}
+
+	return EnemyWidgetController;
+}
+
+void AAuraEnemy::InitEnemyWidget()
+{
+	check(HealthBarWidgetClass)
+	UAuraUserWidget* HealthBar = CreateWidget<UAuraUserWidget>(GetWorld(), HealthBarWidgetClass);
+	HealthBar->SetWidgetController(GetEnemyWidgetController());
+	HealthBarWidget->SetWidget(HealthBar);
+	EnemyWidgetController->BroadcastInitialValues();
 }

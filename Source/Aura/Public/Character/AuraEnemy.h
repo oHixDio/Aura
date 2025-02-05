@@ -7,6 +7,9 @@
 #include "Interaction/Highlightable.h"
 #include "AuraEnemy.generated.h"
 
+class UAuraUserWidget;
+class UEnemyWidgetController;
+class UWidgetComponent;
 /**
  * 
  */
@@ -34,4 +37,22 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Level{1.f};
+
+	UPROPERTY()
+	TObjectPtr<UEnemyWidgetController> EnemyWidgetController{};
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UEnemyWidgetController> EnemyWidgetControllerClass{};
+
+	UFUNCTION(BlueprintCallable)
+	UEnemyWidgetController* GetEnemyWidgetController();
+
+	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
+	TObjectPtr<UWidgetComponent> HealthBarWidget{};
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UAuraUserWidget> HealthBarWidgetClass{};
+
+private:
+	void InitEnemyWidget();
 };
