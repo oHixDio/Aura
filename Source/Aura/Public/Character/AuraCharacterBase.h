@@ -37,24 +37,32 @@ public:
 	
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
-	virtual FVector GetCombatSocketLocation() const override;
-	
 protected:
-	virtual void InitAbilityActorInfo();
-
 	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh{};
 
 	UPROPERTY()
-	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
+	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent{};
 
 	UPROPERTY()
-	TObjectPtr<UAttributeSet> AttributeSet;
+	TObjectPtr<UAttributeSet> AttributeSet{};
 
+	virtual void InitAbilityActorInfo();
+
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// CombatInterface member.
+public:
+	virtual FVector GetCombatSocketLocation() const override;
+
+	virtual UAnimMontage* GetHitReactMontage_Implementation() const override;
+
+protected:
 	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	FName WeaponTipSocketName{};
 
-
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	TObjectPtr<UAnimMontage> HitReactMontage{};
 	
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// Initialize Attributes member.
@@ -73,7 +81,7 @@ public:
 	
 
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
-	// Initialize Abilities member.
+	// Add Abilities member.
 protected:
 	/** StartupAbilitiesをキャラクターに付与する. */
 	void AddCharacterAbilities() const;

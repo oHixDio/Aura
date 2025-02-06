@@ -51,4 +51,9 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	 * Damage
 	 */
 	Instance.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage"), FString("Damage"));
+
+	/**
+	* Event 
+	*/
+	Instance.Events_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.HitReact"), FString("Hit reaction by damage"));
 }

@@ -4,6 +4,7 @@
 #include "Character/AuraCharacterBase.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "GameplayEffectTypes.h"
+#include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 
@@ -33,6 +34,11 @@ FVector AAuraCharacterBase::GetCombatSocketLocation() const
 {
 	check(WeaponMesh);
 	return WeaponMesh->GetSocketLocation(WeaponTipSocketName);
+}
+
+UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation() const
+{
+	return HitReactMontage;
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()

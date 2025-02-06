@@ -6,6 +6,7 @@
 #include "Character/AuraCharacterBase.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/Highlightable.h"
+#include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
 
 class UAuraUserWidget;
@@ -14,16 +15,37 @@ class UWidgetComponent;
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType)
 class AURA_API AAuraEnemy : public AAuraCharacterBase, public IHighlightable
 {
 	GENERATED_BODY()
 
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Super member.
 public:
 	AAuraEnemy();
 	
 	virtual void Tick(float DeltaTime) override;
 
+protected:
+	virtual void BeginPlay() override;
+
+	// ====== ====== ====== ====== ====== ====== 
+	// Core member.
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
+	ECharacterClass CharacterClass{ECharacterClass::Warrior};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
+	float BaseWalkSpeed{250.f};
+
+	virtual void InitAbilityActorInfo() override;
+	
+	virtual void InitializeDefaultAttributes() const override;
+	
+	// ====== ====== ====== ====== ====== ====== 
+	// CombatInterface member.
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bHighlighted{false};
 	
@@ -31,33 +53,26 @@ public:
 	virtual void UnHighlight() override;
 
 	virtual float GetPlayerLevel() const override;
-	
-protected:
-	virtual void BeginPlay() override;
-	virtual void InitAbilityActorInfo() override;
-	virtual void InitializeDefaultAttributes() const override;
 
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
 	float Level{1.f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
-	ECharacterClass CharacterClass{ECharacterClass::Warrior};
-
-	UPROPERTY()
-	TObjectPtr<UEnemyWidgetController> EnemyWidgetController{};
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UEnemyWidgetController> EnemyWidgetControllerClass{};
-
-	UFUNCTION(BlueprintCallable)
-	UEnemyWidgetController* GetEnemyWidgetController();
-
+	// ====== ====== ====== ====== ====== ====== 
+	// HealthBar member.
+protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	TObjectPtr<UWidgetComponent> HealthBarWidget{};
 
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UAuraUserWidget> HealthBarWidgetClass{};
+	UPROPERTY(BlueprintAssignable)
+	FOnAttributeValueChanged OnHealthValueChanged;
 
-private:
-	void InitEnemyWidget();
+	UPROPERTY(BlueprintAssignable)
+	FOnAttributeValueChanged OnMaxHealthValueChanged;
+
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Aura|Character")
+	bool bHitReacting{false};
+	
+	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 };

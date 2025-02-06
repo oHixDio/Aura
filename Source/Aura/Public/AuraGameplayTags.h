@@ -54,7 +54,11 @@ public:
 	FGameplayTag Input_RMB;
 
 	FGameplayTag Damage;
-	
+
+	/**
+	* Event 
+	*/
+	FGameplayTag Events_HitReact;
 	
 private:
 	static FAuraGameplayTags Instance;

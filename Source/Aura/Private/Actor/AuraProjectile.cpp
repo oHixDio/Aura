@@ -70,6 +70,7 @@ void AAuraProjectile::OnOverlapped(UPrimitiveComponent* OverlappedComponent, AAc
 		if (UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(OtherActor))
 		{
 			TargetASC->ApplyGameplayEffectSpecToSelf(*DamageEffectSpecHandle.Data.Get());
+
 		}
 		Destroy();
 	}

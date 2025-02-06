@@ -7,6 +7,8 @@
 #include "AuraGameplayTags.h"
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
+#include "AbilitySystem/Abilities/AuraGameplayAbility.h"
+#include "AuraGameplayTags.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -97,6 +99,15 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 
 		bool bDied = NewHealth <= 0.f;
+
+		// 死んでいない.
+		if (!bDied)
+		{
+			// ヒットリアクションAbilityを実行.
+			// AbilityのActiveTagでチェック.
+			const FGameplayTagContainer TagContainer(FAuraGameplayTags::Get().Events_HitReact);
+			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
+		}
 		
 	}
 }

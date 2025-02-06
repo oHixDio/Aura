@@ -5,9 +5,9 @@
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "AuraGameplayTags.h"
 #include "Components/WidgetComponent.h"
-#include "UI/WidgetController/EnemyWidgetController.h"
-#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "UI/Widget/AuraUserWidget.h"
 
 AAuraEnemy::AAuraEnemy()
@@ -16,7 +16,7 @@ AAuraEnemy::AAuraEnemy()
 	WeaponMesh->SetCustomDepthStencilValue(250);
 
 	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>("HealthBarWidget");
-	HealthBarWidget->SetupAttachment(GetCapsuleComponent());
+	HealthBarWidget->SetupAttachment(GetRootComponent());
 	HealthBarWidget->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBarWidget->SetDrawAtDesiredSize(true);
 
@@ -30,6 +30,65 @@ AAuraEnemy::AAuraEnemy()
 void AAuraEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AAuraEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	}
+	
+	InitAbilityActorInfo();
+
+	// Common AbilityのGiveを実行.（HitReactとか）
+	UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(this,AbilitySystemComponent);
+
+	// 自身をWidgetControllerにする.
+	if (UAuraUserWidget* AuraWidget = Cast<UAuraUserWidget>(HealthBarWidget->GetUserWidgetObject()))
+	{
+		AuraWidget->SetWidgetController(this);
+	}
+
+	if (UAuraAttributeSet* AS = Cast<UAuraAttributeSet>(AttributeSet))
+	{
+		// Health, MaxHealth更新時の処理.
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AS->GetHealthAttribute()).AddLambda(
+			[this](const FOnAttributeChangeData& Data)
+			{
+				OnHealthValueChanged.Broadcast(Data.NewValue);
+			}
+		);
+		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(AS->GetMaxHealthAttribute()).AddLambda(
+			[this](const FOnAttributeChangeData& Data)
+			{
+				OnMaxHealthValueChanged.Broadcast(Data.NewValue);
+			}
+		);
+
+		// Health,MaxHealthの初期化
+		OnHealthValueChanged.Broadcast(AS->GetHealth());
+		OnMaxHealthValueChanged.Broadcast(AS->GetMaxHealth());
+	}
+
+	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Events_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::HitReactTagChanged);
+	
+}
+
+void AAuraEnemy::InitAbilityActorInfo()
+{
+	// EnemyはOwnerとAvatarはどちらも自分自身(Character).
+	AbilitySystemComponent->InitAbilityActorInfo(this, this);
+	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+
+	InitializeDefaultAttributes();
+}
+
+void AAuraEnemy::InitializeDefaultAttributes() const
+{
+	UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
 
 void AAuraEnemy::Highlight()
@@ -51,46 +110,8 @@ float AAuraEnemy::GetPlayerLevel() const
 	return Level;
 }
 
-void AAuraEnemy::BeginPlay()
+void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	Super::BeginPlay();
-	InitAbilityActorInfo();
-}
-
-void AAuraEnemy::InitAbilityActorInfo()
-{
-	// EnemyはOwnerとAvatarはどちらも自分自身(Character).
-	AbilitySystemComponent->InitAbilityActorInfo(this, this);
-	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
-
-	InitializeDefaultAttributes();
-	InitEnemyWidget();
-}
-
-void AAuraEnemy::InitializeDefaultAttributes() const
-{
-	UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
-}
-
-UEnemyWidgetController* AAuraEnemy::GetEnemyWidgetController()
-{
-	if (EnemyWidgetController == nullptr)
-	{
-		check(EnemyWidgetControllerClass);
-		EnemyWidgetController = NewObject<UEnemyWidgetController>(this, EnemyWidgetControllerClass);
-		const FWidgetControllerParams WidgetControllerParams(nullptr, nullptr, AbilitySystemComponent, AttributeSet);
-		EnemyWidgetController->SetWidgetControllerParams(WidgetControllerParams);
-		EnemyWidgetController->BindCallbacksToDependencies();
-	}
-
-	return EnemyWidgetController;
-}
-
-void AAuraEnemy::InitEnemyWidget()
-{
-	check(HealthBarWidgetClass)
-	UAuraUserWidget* HealthBar = CreateWidget<UAuraUserWidget>(GetWorld(), HealthBarWidgetClass);
-	HealthBar->SetWidgetController(GetEnemyWidgetController());
-	HealthBarWidget->SetWidget(HealthBar);
-	EnemyWidgetController->BroadcastInitialValues();
+	bHitReacting = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed= bHitReacting ? 0.f : BaseWalkSpeed;
 }

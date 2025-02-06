@@ -49,13 +49,13 @@ UAttributesMenuWidgetController* UAuraAbilitySystemFunctionLibrary::GetAttribute
 
 void UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* AbilitySystemComponent)
 {
-	const AAuraGameModeBase* GameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
-	if (GameMode == nullptr) return;
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (AuraGameMode == nullptr) return;
 
 	// SourceActorを用意.
 	const AActor* AvatarActor = AbilitySystemComponent->GetAvatarActor();
 	// CharacterClassからClassに適したInit情報取得.
-	const UCharacterClassInfo* CharacterClassInfo = GameMode->CharacterClassInfo;
+	const UCharacterClassInfo* CharacterClassInfo = AuraGameMode->CharacterClassInfo;
 	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
 
 	// Primary属性の初期化.
@@ -75,4 +75,15 @@ void UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(const UObjec
 	VitalContextHandle.AddSourceObject(AvatarActor);
 	const FGameplayEffectSpecHandle VitalAttributesSpecHandle = AbilitySystemComponent->MakeOutgoingSpec(CharacterClassInfo->VitalAttributesEffectClass, Level, VitalContextHandle);
 	AbilitySystemComponent->ApplyGameplayEffectSpecToSelf(*VitalAttributesSpecHandle.Data.Get());
+}
+
+void UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* AbilitySystemComponent)
+{
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	if (AuraGameMode == nullptr) return;
+
+	for (const TSubclassOf<UGameplayAbility>& Ability : AuraGameMode->CharacterClassInfo->CommonAbilities)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability));
+	}
 }
