@@ -45,7 +45,17 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		// DamageEffectを作成してProjectileに渡す.
 		if (const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo()))
 		{
-			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), SourceASC->MakeEffectContext());
+			FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+			EffectContextHandle.SetAbility(this);
+			EffectContextHandle.AddSourceObject(AuraProjectile);
+			TArray<TWeakObjectPtr<AActor>> Actors;
+			Actors.Add(AuraProjectile);
+			EffectContextHandle.AddActors(Actors);
+			FHitResult HitResult;
+			HitResult.Location = ProjectileTargetLocation;
+			EffectContextHandle.AddHitResult(HitResult);
+			
+			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), EffectContextHandle);
 			// SetByCallerにDamageをKeyとしてDamage値を与える.
 			const float ScaledDamage = Damage.GetValueAtLevel(10.f/*GetAbilityLevel()*/);	// todo: Test!!!!
 			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, FAuraGameplayTags::Get().Damage, ScaledDamage);
