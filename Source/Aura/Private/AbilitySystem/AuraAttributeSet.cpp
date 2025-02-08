@@ -7,6 +7,7 @@
 #include "AuraGameplayTags.h"
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
+#include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
 #include "Player/AuraPlayerController.h"
 #include "Interaction/CombatInterface.h"
@@ -119,13 +120,7 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		}
 
 		// FloatingDamageテキストを表示する.
-		if (Props.TargetCharacter != Props.SourceCharacter)
-		{
-			if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller.Get()))
-			{
-				PC->ClientShowFloatingDamage(LocalIncomingDamage, Props.TargetCharacter);
-			}
-		}
+		ShowFloatingDamageText(Props, LocalIncomingDamage);
 	}
 }
 
@@ -250,5 +245,20 @@ void UAuraAttributeSet::SetEffectProperties(const FGameplayEffectModCallbackData
 		Props.TargetController = Data.Target.AbilityActorInfo->PlayerController.Get();
 		Props.TargetCharacter = Cast<ACharacter>(Props.TargetAvatarActor);
 		Props.TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(Props.TargetAvatarActor);
+	}
+}
+
+void UAuraAttributeSet::ShowFloatingDamageText(const FEffectProperties& Props, const float DamageValue)
+{
+	// FloatingDamageテキストを表示する.
+	if (Props.TargetCharacter != Props.SourceCharacter)
+	{
+		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller.Get()))
+		{
+			
+			const bool bIsBlocked = UAuraAbilitySystemFunctionLibrary::IsBlockedHIt(Props.GameplayEffectContextHandle);
+			const bool bIsCriticalHit = UAuraAbilitySystemFunctionLibrary::IsCriticalHIt(Props.GameplayEffectContextHandle);
+			PC->ClientShowFloatingDamage(DamageValue, Props.TargetCharacter);
+		}
 	}
 }

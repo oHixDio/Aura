@@ -4,6 +4,7 @@
 #include "AbilitySystem/ExecCalc/ExecCalc_Damage.h"
 
 #include "AbilitySystemComponent.h"
+#include "AuraAbilityTypes.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
@@ -69,6 +70,8 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	if (!IsValid(CharacterClassInfo)) return;
 
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
+	
 
 	FAggregatorEvaluateParameters EvaluateParams;
 	EvaluateParams.SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
@@ -109,6 +112,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	// Criticalかどうかを判定.
 	const bool bCriticalHit = FMath::RandRange(0, 100) < SourceCriticalHitChance;
+	UAuraAbilitySystemFunctionLibrary::SetIsCriticalHit(EffectContextHandle, bCriticalHit);
 
 	// 有効クリティカルヒットダメージの係数を取得.
 	FRealCurve* CriticalHitResistanceCurve = CharacterClassInfo->DamageCalculationCoefficientCurveTable->FindCurve(FName("CriticalHitResistance"), FString());
@@ -129,6 +133,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	
 	// Damageを確立でBlockする.
 	const bool bBlocked = FMath::RandRange(0, 100) < TargetBlockChance;
+	UAuraAbilitySystemFunctionLibrary::SetIsBlockedHit(EffectContextHandle, bBlocked);
 
 	// ブロックされた場合ダメージ半減.
 	Damage = bBlocked ? Damage / 2.f : Damage;

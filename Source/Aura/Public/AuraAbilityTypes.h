@@ -38,8 +38,10 @@ public:
 	/** Custom serialization, subclasses must override this */
 	virtual bool NetSerialize(FArchive& Ar, class UPackageMap* Map, bool& bOutSuccess) override;
 protected:
-
+	UPROPERTY()
 	bool bIsBlockedHit{false};
+
+	UPROPERTY()
 	bool bIsCriticalHit{false};
 };
 
