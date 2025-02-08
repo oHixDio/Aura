@@ -56,9 +56,13 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 			EffectContextHandle.AddHitResult(HitResult);
 			
 			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), EffectContextHandle);
-			// SetByCallerにDamageをKeyとしてDamage値を与える.
-			const float ScaledDamage = Damage.GetValueAtLevel(10.f/*GetAbilityLevel()*/);	// todo: Test!!!!
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, FAuraGameplayTags::Get().Damage, ScaledDamage);
+			
+			// SetByCallerとしてダメージを伝える。各ダメージはタグがマッピングされている。
+			for (const TTuple<FGameplayTag, FScalableFloat>& DamageType : DamageTypes)
+			{
+				UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageType.Key, DamageType.Value.GetValueAtLevel(GetAbilityLevel()));
+			}
+			
 			AuraProjectile->DamageEffectSpecHandle = SpecHandle;
 		}	
 		

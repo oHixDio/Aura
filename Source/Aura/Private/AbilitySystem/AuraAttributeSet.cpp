@@ -30,6 +30,10 @@ UAuraAttributeSet::UAuraAttributeSet()
 	TagToAttributes.Add(Tags.Attributes_Secondary_CriticalHitChance, GetCriticalHitChanceAttribute);
 	TagToAttributes.Add(Tags.Attributes_Secondary_CriticalHitDamage, GetCriticalHitDamageAttribute);
 	TagToAttributes.Add(Tags.Attributes_Secondary_CriticalHitResistance, GetCriticalHitResistanceAttribute);
+	TagToAttributes.Add(Tags.Attributes_Resistance_Fire, GetFireResistanceAttribute);
+	TagToAttributes.Add(Tags.Attributes_Resistance_Lightning, GetLightningResistanceAttribute);
+	TagToAttributes.Add(Tags.Attributes_Resistance_Arcane, GetArcaneResistanceAttribute);
+	TagToAttributes.Add(Tags.Attributes_Resistance_Physical, GetPhysicalResistanceAttribute);
 	TagToAttributes.Add(Tags.Attributes_Vital_Health, GetHealthAttribute);
 	TagToAttributes.Add(Tags.Attributes_Vital_Mana, GetManaAttribute);
 }
@@ -50,6 +54,10 @@ void UAuraAttributeSet::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, CriticalHitChance, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, CriticalHitDamage, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, CriticalHitResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, FireResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, LightningResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, ArcaneResistance, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, PhysicalResistance, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, HealthRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, ManaRegeneration, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UAuraAttributeSet, MaxHealth, COND_None, REPNOTIFY_Always);
@@ -178,6 +186,26 @@ void UAuraAttributeSet::OnRep_CriticalHitResistance(const FGameplayAttributeData
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, CriticalHitResistance, OldCriticalHitResistance);
 }
 
+void UAuraAttributeSet::OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, FireResistance, OldFireResistance);
+}
+
+void UAuraAttributeSet::OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, LightningResistance, OldLightningResistance);
+}
+
+void UAuraAttributeSet::OnRep_ArcaneResistance(const FGameplayAttributeData& OldArcaneResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, ArcaneResistance, OldArcaneResistance);
+}
+
+void UAuraAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const
+{
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, PhysicalResistance, OldPhysicalResistance);
+}
+
 void UAuraAttributeSet::OnRep_HealthRegeneration(const FGameplayAttributeData& OldHealthRegeneration) const
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UAuraAttributeSet, HealthRegeneration, OldHealthRegeneration);
@@ -258,7 +286,7 @@ void UAuraAttributeSet::ShowFloatingDamageText(const FEffectProperties& Props, c
 			
 			const bool bIsBlocked = UAuraAbilitySystemFunctionLibrary::IsBlockedHIt(Props.GameplayEffectContextHandle);
 			const bool bIsCriticalHit = UAuraAbilitySystemFunctionLibrary::IsCriticalHIt(Props.GameplayEffectContextHandle);
-			PC->ClientShowFloatingDamage(DamageValue, Props.TargetCharacter);
+			PC->ClientShowFloatingDamage(DamageValue, Props.TargetCharacter, bIsBlocked, bIsCriticalHit);
 		}
 	}
 }

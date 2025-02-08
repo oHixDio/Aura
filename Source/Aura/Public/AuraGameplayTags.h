@@ -52,8 +52,27 @@ public:
 	FGameplayTag Input_4;
 	FGameplayTag Input_LMB;
 	FGameplayTag Input_RMB;
+	
+	/**
+	* Resistance
+	*/
+	FGameplayTag Attributes_Resistance_Fire;
+	FGameplayTag Attributes_Resistance_Lightning;
+	FGameplayTag Attributes_Resistance_Arcane;
+	FGameplayTag Attributes_Resistance_Physical;
 
+	/**
+	* Damage
+	*/
 	FGameplayTag Damage;
+	FGameplayTag Damage_Fire;
+	FGameplayTag Damage_Lightning;
+	FGameplayTag Damage_Arcane;
+	FGameplayTag Damage_Physical;
+
+
+
+	TMap<FGameplayTag, FGameplayTag> DamageTypes;
 
 	/**
 	* Event 

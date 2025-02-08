@@ -171,6 +171,34 @@ public:
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, CriticalHitResistance)
 
 	/*
+	* Fireダメージに対する耐性値
+	*/
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_FireResistance, Category = "Aura|Attribute")
+	FGameplayAttributeData FireResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, FireResistance)
+
+	/*
+	* Lightningダメージに対する耐性値
+	*/
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_LightningResistance, Category = "Aura|Attribute")
+	FGameplayAttributeData LightningResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, LightningResistance)
+
+	/*
+	* Arcaneダメージに対する耐性値
+	*/
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_ArcaneResistance, Category = "Aura|Attribute")
+	FGameplayAttributeData ArcaneResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, ArcaneResistance)
+
+	/*
+	* Physicalダメージに対する耐性値
+	*/
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_PhysicalResistance, Category = "Aura|Attribute")
+	FGameplayAttributeData PhysicalResistance;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, PhysicalResistance)
+
+	/*
 	 * Vigorがベース
 	 * 1 秒ごとに回復する体力の量。
 	 */
@@ -201,6 +229,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_MaxMana, Category = "Aura|Attribute")
 	FGameplayAttributeData MaxMana;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, MaxMana)
+	
 
 	UFUNCTION()
 	void OnRep_Armor(const FGameplayAttributeData& OldArmor) const;
@@ -219,6 +248,18 @@ public:
 
 	UFUNCTION()
 	void OnRep_CriticalHitResistance(const FGameplayAttributeData& OldCriticalHitResistance) const;
+
+	UFUNCTION()
+	void OnRep_FireResistance(const FGameplayAttributeData& OldFireResistance) const;
+
+	UFUNCTION()
+	void OnRep_LightningResistance(const FGameplayAttributeData& OldLightningResistance) const;
+
+	UFUNCTION()
+	void OnRep_ArcaneResistance(const FGameplayAttributeData& OldArcaneResistance) const;
+
+	UFUNCTION()
+	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const;
 
 	UFUNCTION()
 	void OnRep_HealthRegeneration(const FGameplayAttributeData& OldHealthRegeneration) const;

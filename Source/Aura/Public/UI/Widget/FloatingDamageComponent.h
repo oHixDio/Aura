@@ -6,6 +6,21 @@
 #include "Components/WidgetComponent.h"
 #include "FloatingDamageComponent.generated.h"
 
+USTRUCT(BlueprintType)
+struct FDamageTypes
+{
+	GENERATED_BODY()
+
+	UPROPERTY(BlueprintReadOnly)
+	float Damage{0.f};
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsBlocked{false};
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsCriticalHit{false};
+};
+
 /**
  * 
  */
@@ -15,5 +30,6 @@ class AURA_API UFloatingDamageComponent : public UWidgetComponent
 	GENERATED_BODY()
 public:
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
-	void SetDamageValue(float DamageValue);
+	void SetDamageTypes(const FDamageTypes DamageTypes);
+
 };

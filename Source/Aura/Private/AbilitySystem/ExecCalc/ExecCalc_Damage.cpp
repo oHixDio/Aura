@@ -80,7 +80,13 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	
 
 	// SetByCallerからDamageを取得.
-	float Damage = Spec.GetSetByCallerMagnitude(FAuraGameplayTags::Get().Damage);
+	float Damage = 0.f;
+
+	for (const TTuple<FGameplayTag, FGameplayTag>& DamageType : FAuraGameplayTags::Get().DamageTypes)
+	{
+		const float TagDamage = Spec.GetSetByCallerMagnitude(DamageType.Key, false);
+		Damage += TagDamage;
+	}
 	
 	// ~ Attributeを取得.
 	float TargetBlockChance{};
