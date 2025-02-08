@@ -49,13 +49,11 @@ UAttributesMenuWidgetController* UAuraAbilitySystemFunctionLibrary::GetAttribute
 
 void UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* AbilitySystemComponent)
 {
-	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
-	if (AuraGameMode == nullptr) return;
-
 	// SourceActorを用意.
 	const AActor* AvatarActor = AbilitySystemComponent->GetAvatarActor();
 	// CharacterClassからClassに適したInit情報取得.
-	const UCharacterClassInfo* CharacterClassInfo = AuraGameMode->CharacterClassInfo;
+	const UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (!IsValid(CharacterClassInfo)) return;
 	const FCharacterClassDefaultInfo ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
 
 	// Primary属性の初期化.
@@ -79,11 +77,17 @@ void UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(const UObjec
 
 void UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* AbilitySystemComponent)
 {
-	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
-	if (AuraGameMode == nullptr) return;
-
-	for (const TSubclassOf<UGameplayAbility>& Ability : AuraGameMode->CharacterClassInfo->CommonAbilities)
+	const UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (!IsValid(CharacterClassInfo)) return;
+	
+	for (const TSubclassOf<UGameplayAbility>& Ability : CharacterClassInfo->CommonAbilities)
 	{
 		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(Ability));
 	}
+}
+
+UCharacterClassInfo* UAuraAbilitySystemFunctionLibrary::GetCharacterClassInfo(const UObject* WorldContextObject)
+{
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	return AuraGameMode ? AuraGameMode->CharacterClassInfo : nullptr;
 }

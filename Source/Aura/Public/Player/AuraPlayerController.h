@@ -8,6 +8,7 @@
 #include "Interaction/Highlightable.h"
 #include "AuraPlayerController.generated.h"
 
+class UFloatingDamageComponent;
 class USplineComponent;
 class UAuraInputConfig;
 class UInputMappingContext;
@@ -107,4 +108,14 @@ private:
 	bool bTargeting{false};
 
 	void AutoRun();
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	//
+public:
+	UFUNCTION(Client, Reliable)
+	void ClientShowFloatingDamage(const float DamageValue, ACharacter* Target);
+
+protected:
+	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	TSubclassOf<UFloatingDamageComponent> FloatingDamageWidgetClass{};
 };

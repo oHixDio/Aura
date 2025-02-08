@@ -8,7 +8,9 @@
 #include "GameFramework/Character.h"
 #include "GameplayEffectExtension.h"
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
-#include "AuraGameplayTags.h"
+#include "Player/AuraPlayerController.h"
+#include "Interaction/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 UAuraAttributeSet::UAuraAttributeSet()
 {
@@ -82,7 +84,6 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 	if (Data.EvaluatedData.Attribute == GetHealthAttribute())
 	{
 		SetHealth(FMath::Clamp(GetHealth(), 0.f, GetMaxHealth()));
-		UE_LOG(LogTemp, Warning, TEXT("Health Changed on %s, Health: %f"), *Props.TargetAvatarActor->GetName(), GetHealth());
 	}
 	if (Data.EvaluatedData.Attribute == GetManaAttribute())
 	{
@@ -98,17 +99,33 @@ void UAuraAttributeSet::PostGameplayEffectExecute(const FGameplayEffectModCallba
 		const float NewHealth = GetHealth() - LocalIncomingDamage;
 		SetHealth(FMath::Clamp(NewHealth, 0.f, GetMaxHealth()));
 
-		bool bDied = NewHealth <= 0.f;
+		const bool bDied = NewHealth <= 0.f;
 
+		// 死んでいる.
+		if (bDied)
+		{
+			if (TScriptInterface<ICombatInterface> CombatActor = Props.TargetAvatarActor)
+			{
+				CombatActor->Die();
+			}
+		}
 		// 死んでいない.
-		if (!bDied)
+		else
 		{
 			// ヒットリアクションAbilityを実行.
 			// AbilityのActiveTagでチェック.
 			const FGameplayTagContainer TagContainer(FAuraGameplayTags::Get().Events_HitReact);
 			Props.TargetASC->TryActivateAbilitiesByTag(TagContainer);
 		}
-		
+
+		// FloatingDamageテキストを表示する.
+		if (Props.TargetCharacter != Props.SourceCharacter)
+		{
+			if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller.Get()))
+			{
+				PC->ClientShowFloatingDamage(LocalIncomingDamage, Props.TargetCharacter);
+			}
+		}
 	}
 }
 

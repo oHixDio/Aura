@@ -8,6 +8,7 @@
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+class UWidgetComponent;
 class UGameplayAbility;
 class UAttributeSet;
 class UAbilitySystemComponent;
@@ -57,6 +58,14 @@ public:
 
 	virtual UAnimMontage* GetHitReactMontage_Implementation() const override;
 
+	virtual void Die() override;
+
+	/*
+	 * 死亡時のServer,Clientの共通処理を記述.
+	 */
+	UFUNCTION(NetMulticast, Reliable)
+	virtual void MulticastDie();
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Aura|Character")
 	FName WeaponTipSocketName{};
@@ -87,6 +96,25 @@ protected:
 	void AddCharacterAbilities() const;
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "CharacterBase")
+	UPROPERTY(EditDefaultsOnly, Category = "Aura|Character")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
+
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// Dissolve member.
+protected:
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Aura|Character")
+	TObjectPtr<UMaterialInstance> MeshDissolveMaterial{};
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Aura|Character")
+	TObjectPtr<UMaterialInstance> WeaponDissolveMaterial{};
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartMeshDissolveTimeLine(UMaterialInstanceDynamic* DynamicMaterialInstance);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void StartWeaponDissolveTimeLine(UMaterialInstanceDynamic* DynamicMaterialInstance);
+
+private:
+	void Dissolve();
 };

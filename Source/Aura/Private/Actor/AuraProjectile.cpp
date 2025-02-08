@@ -51,7 +51,7 @@ void AAuraProjectile::Destroyed()
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation(), GetActorRotation());
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-		TrailAudio->Stop();
+		if (TrailAudio) TrailAudio->Stop();
 	}
 	
 	Super::Destroyed();
@@ -62,7 +62,7 @@ void AAuraProjectile::OnOverlapped(UPrimitiveComponent* OverlappedComponent, AAc
 {
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation(), GetActorRotation());
 	UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
-	TrailAudio->Stop();
+	if (TrailAudio) TrailAudio->Stop();
 	
 	if (HasAuthority())
 	{

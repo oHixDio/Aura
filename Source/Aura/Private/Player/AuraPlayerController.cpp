@@ -11,6 +11,8 @@
 #include "AuraGameplayTags.h"
 #include "NavigationPath.h"
 #include "NavigationSystem.h"
+#include "UI/Widget/FloatingDamageComponent.h"
+#include "GameFramework/Character.h"
 
 AAuraPlayerController::AAuraPlayerController()
 {
@@ -204,5 +206,18 @@ void AAuraPlayerController::AutoRun()
 		{
 			bAutoRunning = false;
 		}
+	}
+}
+
+void AAuraPlayerController::ClientShowFloatingDamage_Implementation(const float DamageValue, ACharacter* Target)
+{
+	if (Target && FloatingDamageWidgetClass)
+	{
+		UFloatingDamageComponent* FloatingDamage = NewObject<UFloatingDamageComponent>(Target, FloatingDamageWidgetClass);
+		FloatingDamage->RegisterComponent();
+		FloatingDamage->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		FloatingDamage->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+		FloatingDamage->SetDamageValue(DamageValue);
+		
 	}
 }

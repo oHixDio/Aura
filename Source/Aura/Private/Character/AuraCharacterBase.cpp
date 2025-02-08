@@ -7,6 +7,7 @@
 #include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -39,6 +40,32 @@ FVector AAuraCharacterBase::GetCombatSocketLocation() const
 UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation() const
 {
 	return HitReactMontage;
+}
+
+void AAuraCharacterBase::Die()
+{
+	WeaponMesh->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
+	MulticastDie();
+}
+
+void AAuraCharacterBase::MulticastDie_Implementation()
+{
+	// Weaponをラグドール化.
+	WeaponMesh->SetSimulatePhysics(true);
+	WeaponMesh->SetEnableGravity(true);
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+
+	// Meshをラグドール化.
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetEnableGravity(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+
+	// カプセルコリジョンをなくす.
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+
+	Dissolve();
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()
@@ -74,4 +101,20 @@ void AAuraCharacterBase::AddCharacterAbilities() const
 	UAuraAbilitySystemComponent* AuraASC = CastChecked<UAuraAbilitySystemComponent>(AbilitySystemComponent);
 
 	AuraASC->AddCharacterAbilities(StartupAbilities);
+}
+
+void AAuraCharacterBase::Dissolve()
+{
+	if (MeshDissolveMaterial)
+	{
+		UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(MeshDissolveMaterial, this);
+		GetMesh()->SetMaterial(0, DynamicMatInst);
+		StartMeshDissolveTimeLine(DynamicMatInst);
+	}
+	if (WeaponDissolveMaterial)
+	{
+		UMaterialInstanceDynamic* DynamicMatInst = UMaterialInstanceDynamic::Create(WeaponDissolveMaterial, this);
+		WeaponMesh->SetMaterial(0, DynamicMatInst);
+		StartWeaponDissolveTimeLine(DynamicMatInst);
+	}
 }

@@ -46,13 +46,18 @@ protected:
 	// ====== ====== ====== ====== ====== ====== 
 	// CombatInterface member.
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura|Character")
 	bool bHighlighted{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura|Character")
+	float LifeSpan{5.f};
 	
 	virtual void Highlight() override;
 	virtual void UnHighlight() override;
 
 	virtual float GetPlayerLevel() const override;
+
+	virtual void Die() override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
