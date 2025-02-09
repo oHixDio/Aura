@@ -72,7 +72,11 @@ public:
 
 
 
-	TMap<FGameplayTag, FGameplayTag> DamageTypes;
+	/*
+	 * @Key DamageType
+	 * @Value Resistance
+	 */
+	TMap<FGameplayTag, FGameplayTag> DamageTypeToResistances;
 
 	/**
 	* Event 

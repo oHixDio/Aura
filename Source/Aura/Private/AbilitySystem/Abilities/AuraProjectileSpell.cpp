@@ -29,7 +29,7 @@ void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocati
 		const FVector SpawnLocation = CombatActor->GetCombatSocketLocation();
 		FRotator SpawnRotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
 		// 地面と水平に飛ばす.
-		SpawnRotation.Pitch = 0.f;
+		// SpawnRotation.Pitch = 0.f;
 		FTransform SpawnTransform;
 		SpawnTransform.SetLocation(SpawnLocation);
 		SpawnTransform.SetRotation(SpawnRotation.Quaternion());

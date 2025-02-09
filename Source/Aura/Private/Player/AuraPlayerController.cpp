@@ -211,7 +211,7 @@ void AAuraPlayerController::AutoRun()
 
 void AAuraPlayerController::ClientShowFloatingDamage_Implementation(const float DamageValue, ACharacter* Target, bool bIsBlocked, bool bIsCriticalHit)
 {
-	if (Target && FloatingDamageWidgetClass)
+	if (Target && FloatingDamageWidgetClass && IsLocalController())
 	{
 		UFloatingDamageComponent* FloatingDamage = NewObject<UFloatingDamageComponent>(Target, FloatingDamageWidgetClass);
 		FloatingDamage->RegisterComponent();

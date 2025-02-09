@@ -43,8 +43,12 @@ void AAuraEnemy::BeginPlay()
 	
 	InitAbilityActorInfo();
 
-	// Common AbilityのGiveを実行.（HitReactとか）
-	UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(this,AbilitySystemComponent);
+	if (HasAuthority())
+	{
+		// Common AbilityのGiveを実行.（HitReactとか）
+		UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(this,AbilitySystemComponent);
+	}
+	
 
 	// 自身をWidgetControllerにする.
 	if (UAuraUserWidget* AuraWidget = Cast<UAuraUserWidget>(HealthBarWidget->GetUserWidgetObject()))
@@ -83,7 +87,11 @@ void AAuraEnemy::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
-	InitializeDefaultAttributes();
+	if (HasAuthority())
+	{
+		InitializeDefaultAttributes();
+	}
+	
 }
 
 void AAuraEnemy::InitializeDefaultAttributes() const

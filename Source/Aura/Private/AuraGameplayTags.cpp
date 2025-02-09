@@ -67,10 +67,10 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	/*
 	 * DamageTypes Mapping
 	 */
-	Instance.DamageTypes.Add(Instance.Damage_Fire, Instance.Attributes_Resistance_Fire);
-	Instance.DamageTypes.Add(Instance.Damage_Lightning, Instance.Attributes_Resistance_Lightning);
-	Instance.DamageTypes.Add(Instance.Damage_Arcane, Instance.Attributes_Resistance_Arcane);
-	Instance.DamageTypes.Add(Instance.Damage_Physical, Instance.Attributes_Resistance_Physical);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Fire, Instance.Attributes_Resistance_Fire);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Lightning, Instance.Attributes_Resistance_Lightning);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Arcane, Instance.Attributes_Resistance_Arcane);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Physical, Instance.Attributes_Resistance_Physical);
 
 	/**
 	* Event 
