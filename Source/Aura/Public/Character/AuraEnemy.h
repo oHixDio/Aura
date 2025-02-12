@@ -9,9 +9,11 @@
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
 
+class AAuraAIController;
 class UAuraUserWidget;
 class UEnemyWidgetController;
 class UWidgetComponent;
+class UBehaviorTree;
 /**
  * 
  */
@@ -24,6 +26,8 @@ class AURA_API AAuraEnemy : public AAuraCharacterBase, public IHighlightable
 	// Super member.
 public:
 	AAuraEnemy();
+
+	virtual void PossessedBy(AController* NewController) override;
 	
 	virtual void Tick(float DeltaTime) override;
 
@@ -80,4 +84,13 @@ public:
 	bool bHitReacting{false};
 	
 	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+
+	// ====== ====== ====== ====== ====== ====== 
+	// AI member.
+protected:
+	UPROPERTY()
+	TObjectPtr<AAuraAIController> AuraAIController;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
+	TObjectPtr<UBehaviorTree> BehaviorTree;
 };
