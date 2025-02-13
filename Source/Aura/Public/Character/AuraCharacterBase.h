@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "GameFramework/Character.h"
 #include "Interaction/CombatInterface.h"
 #include "AuraCharacterBase.generated.h"
 
+struct FGameplayTag;
 class UWidgetComponent;
 class UGameplayAbility;
 class UAttributeSet;
@@ -39,7 +41,16 @@ public:
 	UAttributeSet* GetAttributeSet() const { return AttributeSet; }
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
+	ECharacterClass CharacterClass{ECharacterClass::Warrior};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
+	float BaseWalkSpeed{250.f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
+	float BaseRotationSpeedYaw{360.f};
+	
+	UPROPERTY(EditAnywhere, Category = "Aura")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh{};
 
 	UPROPERTY()
@@ -54,9 +65,11 @@ protected:
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// CombatInterface member.
 public:
-	virtual FVector GetCombatSocketLocation() const override;
+	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const override;
 
 	virtual UAnimMontage* GetHitReactMontage_Implementation() const override;
+
+	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() const override;
 
 	virtual void Die() override;
 
@@ -65,24 +78,28 @@ public:
 	 */
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastDie();
+	
+	virtual bool IsDead_Implementation() const override;
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Aura|Character")
-	FName WeaponTipSocketName{};
-
-	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, Category = "Aura")
 	TObjectPtr<UAnimMontage> HitReactMontage{};
+
+	bool bIsDead{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
+	TArray<FTaggedMontage> TaggedMontages{};
 	
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// Initialize Attributes member.
 public:
-	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, Category = "Aura")
 	TSubclassOf<UGameplayEffect> DefaultPrimaryAttributesClass;
 
-	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, Category = "Aura")
 	TSubclassOf<UGameplayEffect> DefaultSecondaryAttributesClass;
 
-	UPROPERTY(EditAnywhere, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, Category = "Aura")
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributesClass;
 
 	virtual void InitializeDefaultAttributes() const;
@@ -90,23 +107,23 @@ public:
 	
 
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
-	// Add Abilities member.
+	// Add StartUp Abilities member.
 protected:
 	/** StartupAbilitiesをキャラクターに付与する. */
 	void AddCharacterAbilities() const;
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Aura|Character")
+	UPROPERTY(EditDefaultsOnly, Category = "Aura")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
 
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// Dissolve member.
 protected:
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Aura")
 	TObjectPtr<UMaterialInstance> MeshDissolveMaterial{};
 
-	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere,BlueprintReadOnly, Category = "Aura")
 	TObjectPtr<UMaterialInstance> WeaponDissolveMaterial{};
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -117,4 +134,16 @@ protected:
 
 private:
 	void Dissolve();
+
+
+	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
+	// HitReact member.
+public:
+	virtual void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+protected:
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Aura")
+	bool bHitReacting{false};
+
+	
 };

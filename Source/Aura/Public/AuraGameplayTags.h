@@ -82,6 +82,15 @@ public:
 	* Event 
 	*/
 	FGameplayTag Events_HitReact;
+	FGameplayTag Events_Montage_Weapon;
+	FGameplayTag Events_Montage_WeaponTip;
+	FGameplayTag Events_Montage_LeftHand;
+	FGameplayTag Events_Montage_RightHand;
+
+	/**
+	* Abilities 
+	*/
+	FGameplayTag Abilities_Attack;
 	
 private:
 	static FAuraGameplayTags Instance;

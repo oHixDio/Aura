@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
-#include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/Highlightable.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
@@ -37,12 +36,6 @@ protected:
 	// ====== ====== ====== ====== ====== ====== 
 	// Core member.
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
-	ECharacterClass CharacterClass{ECharacterClass::Warrior};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
-	float BaseWalkSpeed{250.f};
-
 	virtual void InitAbilityActorInfo() override;
 	
 	virtual void InitializeDefaultAttributes() const override;
@@ -50,10 +43,10 @@ protected:
 	// ====== ====== ====== ====== ====== ====== 
 	// CombatInterface member.
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura")
 	bool bHighlighted{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura")
 	float LifeSpan{5.f};
 	
 	virtual void Highlight() override;
@@ -64,7 +57,7 @@ public:
 	virtual void Die() override;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	float Level{1.f};
 
 	// ====== ====== ====== ====== ====== ====== 
@@ -80,10 +73,7 @@ protected:
 	FOnAttributeValueChanged OnMaxHealthValueChanged;
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category = "Aura|Character")
-	bool bHitReacting{false};
-	
-	void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
+	virtual void HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
 
 	// ====== ====== ====== ====== ====== ====== 
 	// AI member.
@@ -91,6 +81,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<AAuraAIController> AuraAIController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura|Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 };

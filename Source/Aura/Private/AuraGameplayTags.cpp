@@ -76,4 +76,14 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	* Event 
 	*/
 	Instance.Events_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.HitReact"), FString("Hit reaction by damage"));
+	Instance.Events_Montage_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.Weapon"), FString("Montage by Weapon Attack"));
+	Instance.Events_Montage_WeaponTip = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.WeaponTip"), FString("Montage by Weapon Tip Attack"));
+	Instance.Events_Montage_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.LeftHand"), FString("Montage by LeftHand Attack"));
+	Instance.Events_Montage_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.RightHand"), FString("Montage by RightHand Attack"));
+	
+
+	/**
+	* Abilities 
+	*/
+	Instance.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"), FString("Attack Abilities Tag"));
 }

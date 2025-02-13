@@ -281,9 +281,17 @@ void UAuraAttributeSet::ShowFloatingDamageText(const FEffectProperties& Props, c
 	// FloatingDamageテキストを表示する.
 	if (Props.TargetCharacter != Props.SourceCharacter)
 	{
+		// SourceCharacterかTargetCharacterでダメージ表示する.
+		// SourceCharacterがEnemyの場合、PlayerControllerへのキャストは叶わない.
 		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.SourceCharacter->Controller.Get()))
 		{
-			
+			const bool bIsBlocked = UAuraAbilitySystemFunctionLibrary::IsBlockedHIt(Props.GameplayEffectContextHandle);
+			const bool bIsCriticalHit = UAuraAbilitySystemFunctionLibrary::IsCriticalHIt(Props.GameplayEffectContextHandle);
+			PC->ClientShowFloatingDamage(DamageValue, Props.TargetCharacter, bIsBlocked, bIsCriticalHit);
+			return;
+		}
+		if (AAuraPlayerController* PC = Cast<AAuraPlayerController>(Props.TargetCharacter->Controller.Get()))
+		{
 			const bool bIsBlocked = UAuraAbilitySystemFunctionLibrary::IsBlockedHIt(Props.GameplayEffectContextHandle);
 			const bool bIsCriticalHit = UAuraAbilitySystemFunctionLibrary::IsCriticalHIt(Props.GameplayEffectContextHandle);
 			PC->ClientShowFloatingDamage(DamageValue, Props.TargetCharacter, bIsBlocked, bIsCriticalHit);

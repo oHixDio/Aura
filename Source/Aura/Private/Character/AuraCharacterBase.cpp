@@ -2,12 +2,14 @@
 
 
 #include "Character/AuraCharacterBase.h"
+
+#include "AuraGameplayTags.h"
 #include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "GameplayEffectTypes.h"
 #include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/WidgetComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -28,18 +30,47 @@ AAuraCharacterBase::AAuraCharacterBase()
 void AAuraCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
+	GetCharacterMovement()->RotationRate = FRotator(0, BaseRotationSpeedYaw, 0);
+
+	if (HasAuthority())
+	{
+		// Common AbilityのGiveを実行.（HitReactとか）
+		UAuraAbilitySystemFunctionLibrary::GiveDefaultAbilities(this,AbilitySystemComponent, CharacterClass);
+	}
 }
 
-FVector AAuraCharacterBase::GetCombatSocketLocation() const
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const
 {
-	check(WeaponMesh);
-	return WeaponMesh->GetSocketLocation(WeaponTipSocketName);
+	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
+	if (AuraTags.Events_Montage_Weapon == MontageTag && WeaponMesh)
+	{
+		return WeaponMesh->GetSocketLocation(CombatSocketName::WeaponSocket);
+	}
+	if (AuraTags.Events_Montage_WeaponTip == MontageTag && WeaponMesh)
+	{
+		return WeaponMesh->GetSocketLocation(CombatSocketName::WeaponTipSocket);
+	}
+	if (AuraTags.Events_Montage_LeftHand == MontageTag && GetMesh())
+	{
+		return GetMesh()->GetSocketLocation(CombatSocketName::LeftHandSocket);
+	}
+	if (AuraTags.Events_Montage_RightHand == MontageTag && GetMesh())
+	{
+		return GetMesh()->GetSocketLocation(CombatSocketName::RightHandSocket);
+	}
+	return FVector::ZeroVector;
 }
 
 UAnimMontage* AAuraCharacterBase::GetHitReactMontage_Implementation() const
 {
 	return HitReactMontage;
+}
+
+TArray<FTaggedMontage> AAuraCharacterBase::GetAttackMontages_Implementation() const
+{
+	return TaggedMontages;
 }
 
 void AAuraCharacterBase::Die()
@@ -66,6 +97,12 @@ void AAuraCharacterBase::MulticastDie_Implementation()
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
 
 	Dissolve();
+	bIsDead = true;
+}
+
+bool AAuraCharacterBase::IsDead_Implementation() const
+{
+	return bIsDead;
 }
 
 void AAuraCharacterBase::InitAbilityActorInfo()
@@ -117,4 +154,11 @@ void AAuraCharacterBase::Dissolve()
 		WeaponMesh->SetMaterial(0, DynamicMatInst);
 		StartWeaponDissolveTimeLine(DynamicMatInst);
 	}
+}
+
+void AAuraCharacterBase::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bHitReacting = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bHitReacting ? 0.f : BaseWalkSpeed;
+	GetCharacterMovement()->RotationRate = bHitReacting ? FRotator::ZeroRotator : FRotator(0, BaseRotationSpeedYaw, 0);
 }

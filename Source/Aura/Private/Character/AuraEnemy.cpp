@@ -68,12 +68,6 @@ void AAuraEnemy::BeginPlay()
 	}
 	
 	InitAbilityActorInfo();
-
-	if (HasAuthority())
-	{
-		// Common AbilityのGiveを実行.（HitReactとか）
-		UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(this,AbilitySystemComponent);
-	}
 	
 
 	// 自身をWidgetControllerにする.
@@ -104,7 +98,6 @@ void AAuraEnemy::BeginPlay()
 	}
 
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Events_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::HitReactTagChanged);
-	
 }
 
 void AAuraEnemy::InitAbilityActorInfo()
@@ -152,7 +145,9 @@ void AAuraEnemy::Die()
 
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	bHitReacting = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed= bHitReacting ? 0.f : BaseWalkSpeed;
-	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);
+	Super::HitReactTagChanged(CallbackTag, NewCount);
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);	
+	}
 }
