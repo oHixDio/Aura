@@ -22,7 +22,12 @@ public:
 	virtual void OnRep_PlayerState() override;
 
 	virtual float GetPlayerLevel() const override;
+
+	virtual void InitializeDefaultAttributes() const;
 	
 protected:
 	virtual void InitAbilityActorInfo() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
+	bool bTakeHitReact{false};
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/AuraGameplayAbility.h"
+#include "Interaction/CombatInterface.h"
 #include "AuraDamageGameplayAbility.generated.h"
 
 /**
@@ -22,4 +23,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);
+
+	UFUNCTION(BlueprintPure)
+	FTaggedMontage GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& TaggedMontage) const;
 };

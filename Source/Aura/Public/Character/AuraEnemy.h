@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Character/AuraCharacterBase.h"
+#include "Interaction/EnemyInterface.h"
 #include "Interaction/Highlightable.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "AuraEnemy.generated.h"
@@ -17,7 +18,7 @@ class UBehaviorTree;
  * 
  */
 UCLASS(BlueprintType)
-class AURA_API AAuraEnemy : public AAuraCharacterBase, public IHighlightable
+class AURA_API AAuraEnemy : public AAuraCharacterBase, public IHighlightable, public IEnemyInterface
 {
 	GENERATED_BODY()
 
@@ -41,9 +42,9 @@ protected:
 	virtual void InitializeDefaultAttributes() const override;
 	
 	// ====== ====== ====== ====== ====== ====== 
-	// CombatInterface member.
+	// HighlightableInterface member.
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura")
+	UPROPERTY(BlueprintReadWrite, Category = "Aura")
 	bool bHighlighted{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aura")
@@ -52,13 +53,28 @@ public:
 	virtual void Highlight() override;
 	virtual void UnHighlight() override;
 
+	// ====== ====== ====== ====== ====== ====== 
+	// CombatInterface member.
+public:
 	virtual float GetPlayerLevel() const override;
 
 	virtual void Die() override;
-
+	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	float Level{1.f};
+
+	// ====== ====== ====== ====== ====== ====== 
+	// EnemyInterface member.
+public:
+	virtual AActor* GetCombatTarget_Implementation() override;
+
+	virtual void SetCombatTarget_Implementation(AActor* Target) override;
+
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Aura")
+	TObjectPtr<AActor> CombatTarget{};
+
 
 	// ====== ====== ====== ====== ====== ====== 
 	// HealthBar member.

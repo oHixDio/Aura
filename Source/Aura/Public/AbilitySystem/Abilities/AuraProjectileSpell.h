@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystem/Abilities/AuraDamageGameplayAbility.h"
+#include "GameplayTagContainer.h"
 #include "AuraProjectileSpell.generated.h"
 
 class AAuraProjectile;
@@ -23,5 +24,5 @@ private:
 	TSubclassOf<AAuraProjectile> ProjectileClass;
 
 	UFUNCTION(BlueprintCallable)
-	void SpawnProjectile(const FVector& ProjectileTargetLocation);
+	void SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& CombatSocketTag);
 };

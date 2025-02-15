@@ -7,12 +7,14 @@
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
+class UNiagaraSystem;
+
 namespace CombatSocketName
 {
 	extern const FName WeaponSocket;
-	extern const FName WeaponTipSocket;
 	extern const FName LeftHandSocket;
 	extern const FName RightHandSocket;
+	extern const FName TailSocket;
 }
 
 USTRUCT(BlueprintType)
@@ -21,10 +23,16 @@ struct FTaggedMontage
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UAnimMontage* Montage{};
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FGameplayTag MontageTag{};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UAnimMontage* Montage{};
+	FGameplayTag SocketTag{};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	USoundBase* ImpactSound{};
 };
 
 // This class does not need to be modified.
@@ -46,7 +54,7 @@ public:
 	virtual float GetPlayerLevel() const;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	FVector GetCombatSocketLocation(const FGameplayTag& MontageTag) const;
+	FVector GetCombatSocketLocation(const FGameplayTag& SocketTag) const;
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
 	void SetFacingTarget(const FVector& TargetLocation);
@@ -57,9 +65,14 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	TArray<FTaggedMontage> GetAttackMontages() const;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	FTaggedMontage GetAttackMontageByMontageTag(const FGameplayTag& MontageTag) const;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	UNiagaraSystem* GetBloodEffect();
+
 	virtual void Die() = 0;
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead() const;
-
 };

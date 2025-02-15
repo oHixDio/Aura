@@ -82,10 +82,18 @@ public:
 	* Event 
 	*/
 	FGameplayTag Events_HitReact;
-	FGameplayTag Events_Montage_Weapon;
-	FGameplayTag Events_Montage_WeaponTip;
-	FGameplayTag Events_Montage_LeftHand;
-	FGameplayTag Events_Montage_RightHand;
+	FGameplayTag Events_Montage_1;
+	FGameplayTag Events_Montage_2;
+	FGameplayTag Events_Montage_3;
+	FGameplayTag Events_Montage_4;
+
+	/**
+	* Socket 
+	*/
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_Tail;
 
 	/**
 	* Abilities 

@@ -115,6 +115,8 @@ void AAuraEnemy::InitAbilityActorInfo()
 
 void AAuraEnemy::InitializeDefaultAttributes() const
 {
+	Super::InitializeDefaultAttributes();
+	
 	UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
 
@@ -140,7 +142,21 @@ float AAuraEnemy::GetPlayerLevel() const
 void AAuraEnemy::Die()
 {
 	SetLifeSpan(LifeSpan);
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"),true);	
+	}
 	Super::Die();
+}
+
+AActor* AAuraEnemy::GetCombatTarget_Implementation()
+{
+	return CombatTarget;
+}
+
+void AAuraEnemy::SetCombatTarget_Implementation(AActor* Target)
+{
+	CombatTarget = Target;
 }
 
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)

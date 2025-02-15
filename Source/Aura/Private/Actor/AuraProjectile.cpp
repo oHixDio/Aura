@@ -8,6 +8,7 @@
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "Aura/Aura.h"
 #include "Components/AudioComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -52,6 +53,7 @@ void AAuraProjectile::Destroyed()
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation(), GetActorRotation());
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 		if (TrailAudio) TrailAudio->Stop();
+		bHit = true;
 	}
 	
 	Super::Destroyed();
@@ -60,17 +62,28 @@ void AAuraProjectile::Destroyed()
 void AAuraProjectile::OnOverlapped(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
                                    UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (DamageEffectSpecHandle.Data.IsValid() && DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	if (!DamageEffectSpecHandle.Data.IsValid())
 	{
 		return;
 	}
+	if (DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser() == OtherActor)
+	{
+		return;
+	}
+
+	if (!UAuraAbilitySystemFunctionLibrary::IsNotFriend(DamageEffectSpecHandle.Data.Get()->GetContext().GetEffectCauser(), OtherActor))
+	{
+		return;
+	}
+
+	// Server or Client 全てで未ヒット？
 	if (!bHit)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, ImpactEffect, GetActorLocation(), GetActorRotation());
 		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 		if (TrailAudio) TrailAudio->Stop();
+		bHit = true;
 	}
-	
 	
 	if (HasAuthority())
 	{

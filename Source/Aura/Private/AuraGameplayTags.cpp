@@ -76,10 +76,18 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	* Event 
 	*/
 	Instance.Events_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.HitReact"), FString("Hit reaction by damage"));
-	Instance.Events_Montage_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.Weapon"), FString("Montage by Weapon Attack"));
-	Instance.Events_Montage_WeaponTip = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.WeaponTip"), FString("Montage by Weapon Tip Attack"));
-	Instance.Events_Montage_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.LeftHand"), FString("Montage by LeftHand Attack"));
-	Instance.Events_Montage_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.RightHand"), FString("Montage by RightHand Attack"));
+	Instance.Events_Montage_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.1"), FString("Montage event 1"));
+	Instance.Events_Montage_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.2"), FString("Montage event 2"));
+	Instance.Events_Montage_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.3"), FString("Montage event 3"));
+	Instance.Events_Montage_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.4"), FString("Montage event 4"));
+	
+	/**
+	* Socket 
+	*/
+	Instance.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"), FString("Attack socket of weapon"));
+	Instance.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.LeftHand"), FString("Attack socket of LeftHand"));
+	Instance.CombatSocket_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.RightHand"), FString("Attack socket of RightHand"));
+	Instance.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Tail"), FString("Attack socket of Tail"));
 	
 
 	/**

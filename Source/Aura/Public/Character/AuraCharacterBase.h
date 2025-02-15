@@ -50,7 +50,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	float BaseRotationSpeedYaw{360.f};
 	
-	UPROPERTY(EditAnywhere, Category = "Aura")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh{};
 
 	UPROPERTY()
@@ -65,11 +65,15 @@ protected:
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// CombatInterface member.
 public:
-	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const override;
+	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& SocketTag) const override;
 
 	virtual UAnimMontage* GetHitReactMontage_Implementation() const override;
 
 	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() const override;
+
+	virtual FTaggedMontage GetAttackMontageByMontageTag_Implementation(const FGameplayTag& MontageTag) const override;
+
+	virtual UNiagaraSystem* GetBloodEffect_Implementation() override;
 
 	virtual void Die() override;
 
@@ -85,10 +89,16 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Aura")
 	TObjectPtr<UAnimMontage> HitReactMontage{};
 
-	bool bIsDead{false};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	TArray<FTaggedMontage> TaggedMontages{};
+
+	UPROPERTY(EditAnywhere, Category = "Aura")
+	TObjectPtr<UNiagaraSystem> BloodEffect{};
+
+	UPROPERTY(EditAnywhere, Category = "Aura")
+	TObjectPtr<USoundBase> DeathSound{};
+
+	bool bIsDead{false};
 	
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// Initialize Attributes member.
@@ -144,6 +154,5 @@ protected:
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Aura")
 	bool bHitReacting{false};
-
 	
 };

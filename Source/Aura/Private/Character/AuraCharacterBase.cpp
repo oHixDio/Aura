@@ -10,6 +10,7 @@
 #include "Aura/Aura.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 AAuraCharacterBase::AAuraCharacterBase()
 {
@@ -33,32 +34,27 @@ void AAuraCharacterBase::BeginPlay()
 
 	GetCharacterMovement()->MaxWalkSpeed = BaseWalkSpeed;
 	GetCharacterMovement()->RotationRate = FRotator(0, BaseRotationSpeedYaw, 0);
-
-	if (HasAuthority())
-	{
-		// Common AbilityのGiveを実行.（HitReactとか）
-		UAuraAbilitySystemFunctionLibrary::GiveDefaultAbilities(this,AbilitySystemComponent, CharacterClass);
-	}
+	
 }
 
-FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) const
+FVector AAuraCharacterBase::GetCombatSocketLocation_Implementation(const FGameplayTag& SocketTag) const
 {
 	const FAuraGameplayTags& AuraTags = FAuraGameplayTags::Get();
-	if (AuraTags.Events_Montage_Weapon == MontageTag && WeaponMesh)
+	if (AuraTags.CombatSocket_Weapon == SocketTag && WeaponMesh)
 	{
 		return WeaponMesh->GetSocketLocation(CombatSocketName::WeaponSocket);
 	}
-	if (AuraTags.Events_Montage_WeaponTip == MontageTag && WeaponMesh)
-	{
-		return WeaponMesh->GetSocketLocation(CombatSocketName::WeaponTipSocket);
-	}
-	if (AuraTags.Events_Montage_LeftHand == MontageTag && GetMesh())
+	if (AuraTags.CombatSocket_LeftHand == SocketTag && GetMesh())
 	{
 		return GetMesh()->GetSocketLocation(CombatSocketName::LeftHandSocket);
 	}
-	if (AuraTags.Events_Montage_RightHand == MontageTag && GetMesh())
+	if (AuraTags.CombatSocket_RightHand == SocketTag && GetMesh())
 	{
 		return GetMesh()->GetSocketLocation(CombatSocketName::RightHandSocket);
+	}
+	if (AuraTags.CombatSocket_Tail == SocketTag && GetMesh())
+	{
+		return GetMesh()->GetSocketLocation(CombatSocketName::TailSocket);
 	}
 	return FVector::ZeroVector;
 }
@@ -73,6 +69,23 @@ TArray<FTaggedMontage> AAuraCharacterBase::GetAttackMontages_Implementation() co
 	return TaggedMontages;
 }
 
+FTaggedMontage AAuraCharacterBase::GetAttackMontageByMontageTag_Implementation(const FGameplayTag& MontageTag) const
+{
+	for (const FTaggedMontage& Montage : TaggedMontages)
+	{
+		if (Montage.MontageTag == MontageTag)
+		{
+			return Montage;
+		}
+	}
+	return FTaggedMontage();
+}
+
+UNiagaraSystem* AAuraCharacterBase::GetBloodEffect_Implementation()
+{
+	return BloodEffect;
+}
+
 void AAuraCharacterBase::Die()
 {
 	WeaponMesh->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
@@ -81,6 +94,8 @@ void AAuraCharacterBase::Die()
 
 void AAuraCharacterBase::MulticastDie_Implementation()
 {
+	UGameplayStatics::PlaySoundAtLocation(this, DeathSound, GetActorLocation());
+	
 	// Weaponをラグドール化.
 	WeaponMesh->SetSimulatePhysics(true);
 	WeaponMesh->SetEnableGravity(true);
@@ -126,9 +141,11 @@ void AAuraCharacterBase::ApplyEffectToSelf(const TSubclassOf<UGameplayEffect>& E
 
 void AAuraCharacterBase::InitializeDefaultAttributes() const
 {
-	ApplyEffectToSelf(DefaultPrimaryAttributesClass, 1.f);
-	ApplyEffectToSelf(DefaultSecondaryAttributesClass, 1.f);
-	ApplyEffectToSelf(DefaultVitalAttributesClass, 1.f);
+	if (HasAuthority())
+	{
+		// Common AbilityのGiveを実行.（HitReactとか）
+		UAuraAbilitySystemFunctionLibrary::GiveDefaultAbilities(this,AbilitySystemComponent, CharacterClass);
+	}
 }
 
 void AAuraCharacterBase::AddCharacterAbilities() const

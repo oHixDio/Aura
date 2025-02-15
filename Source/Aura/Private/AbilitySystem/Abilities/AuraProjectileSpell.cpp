@@ -2,10 +2,8 @@
 
 
 #include "AbilitySystem/Abilities/AuraProjectileSpell.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AuraGameplayTags.h"
 #include "Interaction/CombatInterface.h"
 #include "Actor/AuraProjectile.h"
 
@@ -17,14 +15,14 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	//
 }
 
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& CombatSocketTag)
 {
 	// Avatar => Pawn.
 	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
 	
 	check(ProjectileClass);
 
-	const FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), FAuraGameplayTags::Get().Events_Montage_WeaponTip);
+	const FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), CombatSocketTag);
 	FRotator SpawnRotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
 	// 地面と水平に飛ばす.
 	// SpawnRotation.Pitch = 0.f;

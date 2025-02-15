@@ -45,6 +45,15 @@ float AAuraPlayer::GetPlayerLevel() const
 	return AuraPlayerState->GetPlayerLevel();
 }
 
+void AAuraPlayer::InitializeDefaultAttributes() const
+{
+	Super::InitializeDefaultAttributes();
+
+	ApplyEffectToSelf(DefaultPrimaryAttributesClass, 1.f);
+	ApplyEffectToSelf(DefaultSecondaryAttributesClass, 1.f);
+	ApplyEffectToSelf(DefaultVitalAttributesClass, 1.f);
+}
+
 void AAuraPlayer::InitAbilityActorInfo()
 {
 	AAuraPlayerState* AuraPlayerState = GetPlayerState<AAuraPlayerState>();
@@ -63,7 +72,7 @@ void AAuraPlayer::InitAbilityActorInfo()
 		}
 	}
 
-	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Events_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacterBase::HitReactTagChanged);
+	if (bTakeHitReact) AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Events_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraCharacterBase::HitReactTagChanged);
 
 	InitializeDefaultAttributes();
 }
