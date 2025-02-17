@@ -159,6 +159,29 @@ void AAuraEnemy::SetCombatTarget_Implementation(AActor* Target)
 	CombatTarget = Target;
 }
 
+int32 AAuraEnemy::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void AAuraEnemy::IncrementMinionCount_Implementation()
+{
+	MinionCount++;
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsInt(FName("MinionCount"),MinionCount);	
+	}
+}
+
+void AAuraEnemy::DecrementMinionCount_Implementation()
+{
+	MinionCount--;
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsInt(FName("MinionCount"),MinionCount);	
+	}
+}
+
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
 	Super::HitReactTagChanged(CallbackTag, NewCount);

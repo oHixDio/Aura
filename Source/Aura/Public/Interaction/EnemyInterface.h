@@ -27,4 +27,16 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetCombatTarget(AActor* CombatTarget);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetMinionCount();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void IncrementMinionCount();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DecrementMinionCount();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void Spawning();
 };

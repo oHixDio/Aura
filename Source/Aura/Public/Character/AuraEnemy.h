@@ -64,6 +64,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	float Level{1.f};
 
+	
+
 	// ====== ====== ====== ====== ====== ====== 
 	// EnemyInterface member.
 public:
@@ -71,9 +73,17 @@ public:
 
 	virtual void SetCombatTarget_Implementation(AActor* Target) override;
 
+	virtual int32 GetMinionCount_Implementation() override;
+
+	virtual void IncrementMinionCount_Implementation() override;
+
+	virtual void DecrementMinionCount_Implementation() override;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Aura")
 	TObjectPtr<AActor> CombatTarget{};
+
+	int32 MinionCount{};
 
 
 	// ====== ====== ====== ====== ====== ====== 
