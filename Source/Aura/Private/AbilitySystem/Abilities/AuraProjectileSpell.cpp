@@ -2,12 +2,10 @@
 
 
 #include "AbilitySystem/Abilities/AuraProjectileSpell.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
-#include "AuraGameplayTags.h"
-#include "Actor/AuraProjectile.h"
 #include "Interaction/CombatInterface.h"
+#include "Actor/AuraProjectile.h"
 
 void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
                                            const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
@@ -17,41 +15,52 @@ void UAuraProjectileSpell::ActivateAbility(const FGameplayAbilitySpecHandle Hand
 	//
 }
 
-void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation)
+void UAuraProjectileSpell::SpawnProjectile(const FVector& ProjectileTargetLocation, const FGameplayTag& CombatSocketTag)
 {
 	// Avatar => Pawn.
 	if (!GetAvatarActorFromActorInfo()->HasAuthority()) return;
 	
 	check(ProjectileClass);
 
-	if (TScriptInterface<ICombatInterface> CombatActor = GetAvatarActorFromActorInfo())
+	const FVector SpawnLocation = ICombatInterface::Execute_GetCombatSocketLocation(GetAvatarActorFromActorInfo(), CombatSocketTag);
+	FRotator SpawnRotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
+	// 地面と水平に飛ばす.
+	// SpawnRotation.Pitch = 0.f;
+	FTransform SpawnTransform;
+	SpawnTransform.SetLocation(SpawnLocation);
+	SpawnTransform.SetRotation(SpawnRotation.Quaternion());
+
+	AAuraProjectile* AuraProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
+		ProjectileClass,
+		SpawnTransform,
+		GetOwningActorFromActorInfo(),
+		Cast<APawn>(GetOwningActorFromActorInfo()),
+		ESpawnActorCollisionHandlingMethod::AlwaysSpawn
+	);
+
+	// DamageEffectを作成してProjectileに渡す.
+	if (const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo()))
 	{
-		const FVector SpawnLocation = CombatActor->GetCombatSocketLocation();
-		FRotator SpawnRotation = (ProjectileTargetLocation - SpawnLocation).Rotation();
-		// 地面と水平に飛ばす.
-		SpawnRotation.Pitch = 0.f;
-		FTransform SpawnTransform;
-		SpawnTransform.SetLocation(SpawnLocation);
-		SpawnTransform.SetRotation(SpawnRotation.Quaternion());
-
-		AAuraProjectile* AuraProjectile = GetWorld()->SpawnActorDeferred<AAuraProjectile>(
-			ProjectileClass,
-			SpawnTransform,
-			GetOwningActorFromActorInfo(),
-			Cast<APawn>(GetOwningActorFromActorInfo()),
-			ESpawnActorCollisionHandlingMethod::AlwaysSpawn
-		);
-
-		// DamageEffectを作成してProjectileに渡す.
-		if (const UAbilitySystemComponent* SourceASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetAvatarActorFromActorInfo()))
+		FGameplayEffectContextHandle EffectContextHandle = SourceASC->MakeEffectContext();
+		EffectContextHandle.SetAbility(this);
+		EffectContextHandle.AddSourceObject(AuraProjectile);
+		TArray<TWeakObjectPtr<AActor>> Actors;
+		Actors.Add(AuraProjectile);
+		EffectContextHandle.AddActors(Actors);
+		FHitResult HitResult;
+		HitResult.Location = ProjectileTargetLocation;
+		EffectContextHandle.AddHitResult(HitResult);
+			
+		const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), EffectContextHandle);
+			
+		// SetByCallerとしてダメージを伝える。各ダメージはタグがマッピングされている。
+		for (const TTuple<FGameplayTag, FScalableFloat>& DamageType : DamageTypes)
 		{
-			const FGameplayEffectSpecHandle SpecHandle = SourceASC->MakeOutgoingSpec(DamageEffect, GetAbilityLevel(), SourceASC->MakeEffectContext());
-			// SetByCallerにDamageをKeyとしてDamage値を与える.
-			const float ScaledDamage = Damage.GetValueAtLevel(10.f/*GetAbilityLevel()*/);	// todo: Test!!!!
-			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, FAuraGameplayTags::Get().Damage, ScaledDamage);
-			AuraProjectile->DamageEffectSpecHandle = SpecHandle;
-		}	
+			UAbilitySystemBlueprintLibrary::AssignTagSetByCallerMagnitude(SpecHandle, DamageType.Key, DamageType.Value.GetValueAtLevel(GetAbilityLevel()));
+		}
+			
+		AuraProjectile->DamageEffectSpecHandle = SpecHandle;
+	}	
 		
-		AuraProjectile->FinishSpawning(SpawnTransform);
-	}
+	AuraProjectile->FinishSpawning(SpawnTransform);
 }

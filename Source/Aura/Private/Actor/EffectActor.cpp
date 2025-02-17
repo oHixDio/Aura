@@ -14,6 +14,8 @@ AEffectActor::AEffectActor()
 
 void AEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TSubclassOf<UGameplayEffect> GameplayEffectClass)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bEnemyEffectApplication) return;
+	
 	UAbilitySystemComponent* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	if (TargetASC == nullptr) return;	// ← ASCを持っていないActorと接触する可能性がある.
 
@@ -27,15 +29,22 @@ void AEffectActor::ApplyEffectToTarget(AActor* TargetActor, const TSubclassOf<UG
 
 	// InfiniteEffectをRemoveするには保持しなくてはならない.F
 	const bool bIsInfinite = EffectSpecHandle.Data.Get()->Def.Get()->DurationPolicy == EGameplayEffectDurationType::Infinite;
-	if (bIsInfinite && InfiniteRemovalPolicy ==EEffectRemovalPolicy::RemoveOnEndOverlap)
+	if (bIsInfinite && InfiniteRemovalPolicy == EEffectRemovalPolicy::RemoveOnEndOverlap)
 	{
 		// Effect毎に複数のActorがそのEffectを実行している可能性があるため、Mapを使用する.
 		ActiveEffectHandles.Add(ActiveGameplayEffectHandle, TargetASC);
+	}
+
+	if (!bIsInfinite)
+	{
+		Destroy();
 	}
 }
 
 void AEffectActor::OnBeginOverlap(AActor* TargetActor)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bEnemyEffectApplication) return;
+	
 	// BeginOverlapで実行する設定であるGameplayEffectを実行する.
 	
 	if (InstantApplicationPolicy == EEffectApplicationPolicy::ApplyOnBeginOverlap)
@@ -54,6 +63,8 @@ void AEffectActor::OnBeginOverlap(AActor* TargetActor)
 
 void AEffectActor::OnEndOverlap(AActor* TargetActor)
 {
+	if (TargetActor->ActorHasTag(FName("Enemy")) && !bEnemyEffectApplication) return;
+	
 	// EndOverlapで実行する設定であるGameplayEffectを実行する.
 	
 	if (InstantApplicationPolicy == EEffectApplicationPolicy::ApplyOnEndOverlap)

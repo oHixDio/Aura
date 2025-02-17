@@ -6,6 +6,9 @@
 #include "AbilitySystem/AuraAbilitySystemFunctionLibrary.h"
 #include "AbilitySystem/AuraAttributeSet.h"
 #include "AuraGameplayTags.h"
+#include "AI/AuraAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "BehaviorTree/BehaviorTree.h"
 #include "Components/WidgetComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "UI/Widget/AuraUserWidget.h"
@@ -14,6 +17,16 @@ AAuraEnemy::AAuraEnemy()
 {
 	GetMesh()->SetCustomDepthStencilValue(250);
 	WeaponMesh->SetCustomDepthStencilValue(250);
+
+
+	// ~~AIのMoveToで滑らかにEnemyを回転移動させるための設定.
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = false;
+	bUseControllerRotationRoll = false;
+
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// ~~
 
 	HealthBarWidget = CreateDefaultSubobject<UWidgetComponent>("HealthBarWidget");
 	HealthBarWidget->SetupAttachment(GetRootComponent());
@@ -25,6 +38,19 @@ AAuraEnemy::AAuraEnemy()
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	AttributeSet = CreateDefaultSubobject<UAuraAttributeSet>("AttributeSet");
+}
+
+void AAuraEnemy::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	if (!HasAuthority()) return;
+	// BehaviorTreeを初期化してを実行.
+	AuraAIController =Cast<AAuraAIController>(NewController);
+	AuraAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
+	AuraAIController->RunBehaviorTree(BehaviorTree);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),false);
+	AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
 }
 
 void AAuraEnemy::Tick(float DeltaTime)
@@ -42,9 +68,7 @@ void AAuraEnemy::BeginPlay()
 	}
 	
 	InitAbilityActorInfo();
-
-	// Common AbilityのGiveを実行.（HitReactとか）
-	UAuraAbilitySystemFunctionLibrary::GiveCommonAbilities(this,AbilitySystemComponent);
+	
 
 	// 自身をWidgetControllerにする.
 	if (UAuraUserWidget* AuraWidget = Cast<UAuraUserWidget>(HealthBarWidget->GetUserWidgetObject()))
@@ -74,7 +98,6 @@ void AAuraEnemy::BeginPlay()
 	}
 
 	AbilitySystemComponent->RegisterGameplayTagEvent(FAuraGameplayTags::Get().Events_HitReact, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &AAuraEnemy::HitReactTagChanged);
-	
 }
 
 void AAuraEnemy::InitAbilityActorInfo()
@@ -83,11 +106,17 @@ void AAuraEnemy::InitAbilityActorInfo()
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<UAuraAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
 
-	InitializeDefaultAttributes();
+	if (HasAuthority())
+	{
+		InitializeDefaultAttributes();
+	}
+	
 }
 
 void AAuraEnemy::InitializeDefaultAttributes() const
 {
+	Super::InitializeDefaultAttributes();
+	
 	UAuraAbilitySystemFunctionLibrary::InitializeDefaultAttributes(this, CharacterClass, Level, AbilitySystemComponent);
 }
 
@@ -113,11 +142,51 @@ float AAuraEnemy::GetPlayerLevel() const
 void AAuraEnemy::Die()
 {
 	SetLifeSpan(LifeSpan);
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"),true);	
+	}
 	Super::Die();
+}
+
+AActor* AAuraEnemy::GetCombatTarget_Implementation()
+{
+	return CombatTarget;
+}
+
+void AAuraEnemy::SetCombatTarget_Implementation(AActor* Target)
+{
+	CombatTarget = Target;
+}
+
+int32 AAuraEnemy::GetMinionCount_Implementation()
+{
+	return MinionCount;
+}
+
+void AAuraEnemy::IncrementMinionCount_Implementation()
+{
+	MinionCount++;
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsInt(FName("MinionCount"),MinionCount);	
+	}
+}
+
+void AAuraEnemy::DecrementMinionCount_Implementation()
+{
+	MinionCount--;
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsInt(FName("MinionCount"),MinionCount);	
+	}
 }
 
 void AAuraEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
 {
-	bHitReacting = NewCount > 0;
-	GetCharacterMovement()->MaxWalkSpeed= bHitReacting ? 0.f : BaseWalkSpeed;
+	Super::HitReactTagChanged(CallbackTag, NewCount);
+	if (AuraAIController && AuraAIController->GetBlackboardComponent())
+	{
+		AuraAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"),bHitReacting);	
+	}
 }

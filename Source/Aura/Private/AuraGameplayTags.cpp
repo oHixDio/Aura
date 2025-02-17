@@ -51,9 +51,48 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	 * Damage
 	 */
 	Instance.Damage = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage"), FString("Damage"));
+	Instance.Damage_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage.Fire"), FString("Fire Damage"));
+	Instance.Damage_Lightning = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage.Lightning"), FString("Lightning Damage"));
+	Instance.Damage_Arcane = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage.Arcane"), FString("Arcane Damage"));
+	Instance.Damage_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Damage.Physical"), FString("Physical Damage"));
+
+	/**
+	* Resistance
+	*/
+	Instance.Attributes_Resistance_Fire = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Resistance.Fire"), FString("Resistance of Fire Damage"));
+	Instance.Attributes_Resistance_Lightning = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Resistance.Lightning"), FString("Resistance of Lightning Damage"));
+	Instance.Attributes_Resistance_Arcane = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Resistance.Arcane"), FString("Resistance of Arcane Damage"));
+	Instance.Attributes_Resistance_Physical = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Resistance.Physical"), FString("Resistance of Physical Damage"));
+
+	/*
+	 * DamageTypes Mapping
+	 */
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Fire, Instance.Attributes_Resistance_Fire);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Lightning, Instance.Attributes_Resistance_Lightning);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Arcane, Instance.Attributes_Resistance_Arcane);
+	Instance.DamageTypeToResistances.Add(Instance.Damage_Physical, Instance.Attributes_Resistance_Physical);
 
 	/**
 	* Event 
 	*/
 	Instance.Events_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.HitReact"), FString("Hit reaction by damage"));
+	Instance.Events_Montage_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.1"), FString("Montage event 1"));
+	Instance.Events_Montage_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.2"), FString("Montage event 2"));
+	Instance.Events_Montage_3 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.3"), FString("Montage event 3"));
+	Instance.Events_Montage_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Events.Montage.4"), FString("Montage event 4"));
+	
+	/**
+	* Socket 
+	*/
+	Instance.CombatSocket_Weapon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Weapon"), FString("Attack socket of weapon"));
+	Instance.CombatSocket_LeftHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.LeftHand"), FString("Attack socket of LeftHand"));
+	Instance.CombatSocket_RightHand = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.RightHand"), FString("Attack socket of RightHand"));
+	Instance.CombatSocket_Tail = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("CombatSocket.Tail"), FString("Attack socket of Tail"));
+	
+
+	/**
+	* Abilities 
+	*/
+	Instance.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"), FString("Attack Abilities Tag"));
+	Instance.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Summon"), FString("Summon Abilities Tag"));
 }

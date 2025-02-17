@@ -52,13 +52,54 @@ public:
 	FGameplayTag Input_4;
 	FGameplayTag Input_LMB;
 	FGameplayTag Input_RMB;
+	
+	/**
+	* Resistance
+	*/
+	FGameplayTag Attributes_Resistance_Fire;
+	FGameplayTag Attributes_Resistance_Lightning;
+	FGameplayTag Attributes_Resistance_Arcane;
+	FGameplayTag Attributes_Resistance_Physical;
 
+	/**
+	* Damage
+	*/
 	FGameplayTag Damage;
+	FGameplayTag Damage_Fire;
+	FGameplayTag Damage_Lightning;
+	FGameplayTag Damage_Arcane;
+	FGameplayTag Damage_Physical;
+
+
+
+	/*
+	 * @Key DamageType
+	 * @Value Resistance
+	 */
+	TMap<FGameplayTag, FGameplayTag> DamageTypeToResistances;
 
 	/**
 	* Event 
 	*/
 	FGameplayTag Events_HitReact;
+	FGameplayTag Events_Montage_1;
+	FGameplayTag Events_Montage_2;
+	FGameplayTag Events_Montage_3;
+	FGameplayTag Events_Montage_4;
+
+	/**
+	* Socket 
+	*/
+	FGameplayTag CombatSocket_Weapon;
+	FGameplayTag CombatSocket_LeftHand;
+	FGameplayTag CombatSocket_RightHand;
+	FGameplayTag CombatSocket_Tail;
+
+	/**
+	* Abilities 
+	*/
+	FGameplayTag Abilities_Attack;
+	FGameplayTag Abilities_Summon;
 	
 private:
 	static FAuraGameplayTags Instance;

@@ -44,29 +44,32 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void OnEndOverlap(AActor* TargetActor);
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	TSubclassOf<UGameplayEffect> InstantGameplayEffectClass{};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	EEffectApplicationPolicy InstantApplicationPolicy{ EEffectApplicationPolicy::DoNotApply };
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	TSubclassOf<UGameplayEffect> DurationGameplayEffectClass;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	EEffectApplicationPolicy DurationApplicationPolicy{ EEffectApplicationPolicy::DoNotApply };
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	TSubclassOf<UGameplayEffect> InfiniteGameplayEffectClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	EEffectApplicationPolicy InfiniteApplicationPolicy{ EEffectApplicationPolicy::DoNotApply };
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	EEffectRemovalPolicy InfiniteRemovalPolicy{ EEffectRemovalPolicy::RemoveOnEndOverlap };
 
 	TMap<FActiveGameplayEffectHandle, UAbilitySystemComponent*> ActiveEffectHandles;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Galaxy| Effects")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
 	float ActorLevel{ 1.f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura| Effects")
+	bool bEnemyEffectApplication{false};
 };

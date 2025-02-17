@@ -209,15 +209,19 @@ void AAuraPlayerController::AutoRun()
 	}
 }
 
-void AAuraPlayerController::ClientShowFloatingDamage_Implementation(const float DamageValue, ACharacter* Target)
+void AAuraPlayerController::ClientShowFloatingDamage_Implementation(const float DamageValue, ACharacter* Target, bool bIsBlocked, bool bIsCriticalHit)
 {
-	if (Target && FloatingDamageWidgetClass)
+	if (Target && FloatingDamageWidgetClass && IsLocalController())
 	{
 		UFloatingDamageComponent* FloatingDamage = NewObject<UFloatingDamageComponent>(Target, FloatingDamageWidgetClass);
 		FloatingDamage->RegisterComponent();
 		FloatingDamage->AttachToComponent(Target->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		FloatingDamage->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-		FloatingDamage->SetDamageValue(DamageValue);
+		FDamageTypes DamageTypes{};
+		DamageTypes.Damage = DamageValue;
+		DamageTypes.bIsBlocked =bIsBlocked;
+		DamageTypes.bIsCriticalHit =bIsCriticalHit;
+		FloatingDamage->SetDamageTypes(DamageTypes);
 		
 	}
 }

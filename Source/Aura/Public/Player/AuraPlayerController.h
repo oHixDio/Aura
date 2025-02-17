@@ -113,7 +113,7 @@ private:
 	//
 public:
 	UFUNCTION(Client, Reliable)
-	void ClientShowFloatingDamage(const float DamageValue, ACharacter* Target);
+	void ClientShowFloatingDamage(const float DamageValue, ACharacter* Target, bool bIsBlocked, bool bIsCriticalHit);
 
 protected:
 	UPROPERTY(EditAnywhere, Category = "Aura|Character")
