@@ -114,9 +114,13 @@ void AAuraPlayerController::ClickToMoveByReleased()
 			for (FVector& PathLoc : NavPath->PathPoints)
 			{
 				Spline->AddSplinePoint(PathLoc, ESplineCoordinateSpace::World);
+				DrawDebugSphere(GetWorld(), PathLoc, 10.f, 15, FColor::Red, false, 3.f);
 			}
-			if (!NavPath->PathPoints.IsEmpty()) CashedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
-			bAutoRunning = true;	// AutoRun状態に.
+			if (!NavPath->PathPoints.IsEmpty())
+			{
+				CashedDestination = NavPath->PathPoints[NavPath->PathPoints.Num() - 1];
+				bAutoRunning = true;	// AutoRun状態に.
+			}
 		}
 	}
 	// Hold時の情報クリア.
@@ -178,6 +182,8 @@ void AAuraPlayerController::CursorTrace()
 	GetHitResultUnderCursor(ECC_Visibility, false, CursorHit);
 	if (!CursorHit.bBlockingHit) return;
 
+	DrawDebugSphere(GetWorld(), CursorHit.ImpactPoint, 15.f, 15, FColor::Green);
+
 	LastHoverActor = ThisHoverActor;
 	ThisHoverActor = CursorHit.GetActor();
 	
@@ -195,9 +201,9 @@ void AAuraPlayerController::AutoRun()
 	if (APawn* ControlledPawn = GetPawn<APawn>())
 	{
 		// 現在座標からSpline座標の中で一番近いLocation取得.
-		FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
+		const FVector LocationOnSpline = Spline->FindLocationClosestToWorldLocation(ControlledPawn->GetActorLocation(), ESplineCoordinateSpace::World);
 		// SplineLocationまでの移動を取得.
-		FVector WorldDirection = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
+		const FVector WorldDirection = Spline->FindDirectionClosestToWorldLocation(LocationOnSpline, ESplineCoordinateSpace::World);
 		ControlledPawn->AddMovementInput(WorldDirection);
 
 		// Mouse押下Locationまでの距離がAutoRun許可範囲を下回ったら、AutoRunを止める.
