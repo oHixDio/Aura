@@ -36,6 +36,12 @@ void AAuraPlayer::OnRep_PlayerState()
 
 	// ActorInfoをクライアントで設定.
 	InitAbilityActorInfo();
+	
+}
+
+void AAuraPlayer::BeginPlay()
+{
+	Super::BeginPlay();
 }
 
 float AAuraPlayer::GetPlayerLevel() const
@@ -76,3 +82,5 @@ void AAuraPlayer::InitAbilityActorInfo()
 
 	InitializeDefaultAttributes();
 }
+
+

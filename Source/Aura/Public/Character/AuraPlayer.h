@@ -28,6 +28,8 @@ public:
 protected:
 	virtual void InitAbilityActorInfo() override;
 
+	virtual void BeginPlay() override;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Aura")
 	bool bTakeHitReact{false};
 };
