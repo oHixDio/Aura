@@ -85,6 +85,8 @@ public:
 	
 	virtual bool IsDead_Implementation() const override;
 
+	virtual ECharacterClass GetCharacterClass_Implementation() const override;
+
 protected:
 	UPROPERTY(EditAnywhere, Category = "Aura")
 	TObjectPtr<UAnimMontage> HitReactMontage{};
@@ -99,6 +101,8 @@ protected:
 	TObjectPtr<USoundBase> DeathSound{};
 
 	bool bIsDead{false};
+	
+	
 	
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// Initialize Attributes member.
@@ -126,7 +130,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Aura")
 	TArray<TSubclassOf<UGameplayAbility>> StartupAbilities;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Aura")
+	TArray<TSubclassOf<UGameplayAbility>> StartupPassiveAbilities;
+	
 
+	
 	// ///// ///// ///// ///// ///// ///// ///// ///// ///// /////
 	// Dissolve member.
 protected:

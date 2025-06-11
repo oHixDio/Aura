@@ -3,3 +3,25 @@
 
 #include "Player/Data/LevelUpInfo.h"
 
+int32 ULevelUpInfo::FindLevelForXP(const int32 XP) const
+{
+	int32 Level = 0;
+	bool bSearching =true;
+	while (bSearching)
+	{
+		if (LevelUpInformation.Num() - 1 <= Level)
+		{
+			return Level;
+		}
+
+		if (XP >= LevelUpInformation[Level].LevelUpRequirement)
+		{
+			++Level;
+		}
+		else
+		{
+			bSearching = false;
+		}
+	}
+	return Level;
+}

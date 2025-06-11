@@ -21,4 +21,12 @@ public:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aura")
 	FGameplayTag StartupInputTag{};
+	
+protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Aura")
+	FText AbilityName = FText();
+
+	
 };
+
+

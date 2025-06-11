@@ -14,12 +14,24 @@ UCLASS()
 class AURA_API UAuraDamageGameplayAbility : public UAuraGameplayAbility
 {
 	GENERATED_BODY()
+public:
+	float GetCost(const float InLevel) const;
+
+	float GetCooldown(const float InLevel) const;
+
+	float GetDamage(const float InLevel) const;
+
+	FText GetAbilityName() const;
+	
 protected:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UGameplayEffect> DamageEffect{};
 
 	UPROPERTY(EditAnywhere)
 	TMap<FGameplayTag, FScalableFloat> DamageTypes;
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag DamageTag;
 
 	UFUNCTION(BlueprintCallable)
 	void CauseDamage(AActor* TargetActor);

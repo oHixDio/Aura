@@ -12,6 +12,7 @@ class UOverlayWidgetController;
 class UAuraUserWidget;
 class UAbilitySystemComponent;
 class UAttributeSet;
+class USpellMenuWidgetController;
 /**
  * 
  */
@@ -38,7 +39,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UOverlayWidgetController> OverlayWidgetControllerInstance{};
 
-	UPROPERTY(EditAnywhere, Category = "Galaxy|UI")
+	UPROPERTY(EditAnywhere, Category = "Aura|UI")
 	TSubclassOf<UOverlayWidgetController> OverlayWidgetControllerClass{};
 
 
@@ -53,8 +54,21 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAttributesMenuWidgetController> AttributesMenuWidgetControllerInstance{};
 
-	UPROPERTY(EditAnywhere, Category = "Galaxy|UI")
+	UPROPERTY(EditAnywhere, Category = "Aura|UI")
 	TSubclassOf<UAttributesMenuWidgetController> AttributesMenuWidgetControllerClass{};
+
+	/*
+	* Construction Attributes Menu Widget Controller
+	*/
+public:
+	USpellMenuWidgetController* GetSpellMenuWidgetControllerInstance(const FWidgetControllerParams& WidgetControllerParams);
+
+private:
+	UPROPERTY()
+	TObjectPtr<USpellMenuWidgetController> SpellWidgetControllerInstance{};
+
+	UPROPERTY(EditAnywhere, Category = "Aura|UI")
+	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass{};
 
 	
 };

@@ -95,6 +95,13 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	const TScriptInterface<ICombatInterface> SourceCombatActor = SourceAvatar;
 	const TScriptInterface<ICombatInterface> TargetCombatActor = TargetAvatar;
+	int32 SourcePlayerLevel = 1;
+	int32 TargetPlayerLevel = 1;
+	if (SourceAvatar->Implements<UCombatInterface>() && TargetAvatar->Implements<UCombatInterface>())
+	{
+		SourcePlayerLevel = ICombatInterface::Execute_GetPlayerLevel(SourceAvatar);
+		TargetPlayerLevel = ICombatInterface::Execute_GetPlayerLevel(TargetAvatar);
+	}
 		
 	const UCharacterClassInfo* CharacterClassInfo = UAuraAbilitySystemFunctionLibrary::GetCharacterClassInfo(SourceAvatar);
 	if (!IsValid(CharacterClassInfo)) return;
@@ -162,14 +169,14 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	// 有効クリティカルヒットダメージの係数を取得.
 	FRealCurve* CriticalHitResistanceCurve = CharacterClassInfo->DamageCalculationCoefficientCurveTable->FindCurve(FName("CriticalHitResistance"), FString());
-	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCurve->Eval(SourceCombatActor->GetPlayerLevel());
+	const float CriticalHitResistanceCoefficient = CriticalHitResistanceCurve->Eval(SourcePlayerLevel);
 
 	// 実際に有効なクリティカルダメージを算出.
 	const float EffectiveCriticalHitDamage = SourceCriticalHitDamage * (100 - TargetCriticalHitResistance * CriticalHitResistanceCoefficient) / 100.f;
 	
 	// クリティカルヒットダメージの係数を取得.
 	FRealCurve* CriticalHitDamageCurve = CharacterClassInfo->DamageCalculationCoefficientCurveTable->FindCurve(FName("CriticalHitDamage"), FString());
-	const float CriticalHitDamageCoefficient = CriticalHitDamageCurve->Eval(SourceCombatActor->GetPlayerLevel());
+	const float CriticalHitDamageCoefficient = CriticalHitDamageCurve->Eval(SourcePlayerLevel);
 
 	// CriticalHitDamageを算出.
 	const float RealCriticalHitDamage = Damage * 2.f + EffectiveCriticalHitDamage * CriticalHitDamageCoefficient;
@@ -185,14 +192,14 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	
 	// ArmorPenetrationの係数を取得.(Sourceから)
 	FRealCurve* ArmorPenetrationCurve = CharacterClassInfo->DamageCalculationCoefficientCurveTable->FindCurve(FName("ArmorPenetration"), FString());
-	const float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourceCombatActor->GetPlayerLevel());
+	const float ArmorPenetrationCoefficient = ArmorPenetrationCurve->Eval(SourcePlayerLevel);
 	
 	// Armor浸食を計算して、実際に効果あるArmor値を算出.
 	const float EffectiveArmor = TargetArmor * (100 - SourceArmorPenetration * ArmorPenetrationCoefficient) / 100.f;
 
 	// EffectiveArmorの係数を取得.(Targetから)
 	FRealCurve* EffectiveArmorCurve = CharacterClassInfo->DamageCalculationCoefficientCurveTable->FindCurve(FName("EffectiveArmor"), FString());
-	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(TargetCombatActor->GetPlayerLevel());
+	const float EffectiveArmorCoefficient = EffectiveArmorCurve->Eval(TargetPlayerLevel);
 	
 	// Damageに適用するArmor値を算出.
 	const float RealArmor = (100 - EffectiveArmor * EffectiveArmorCoefficient) / 100.f;

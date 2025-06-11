@@ -35,8 +35,11 @@ float UMMC_MaxMana::CalculateBaseMagnitude_Implementation(const FGameplayEffectS
 	const float Intelligence = FMath::Max(Magnitude, 0.f);
 
 	// CombatInterfaceを実装している前提に、Levelを取得.
-	TScriptInterface<ICombatInterface> CombatInterface = Spec.GetContext().GetSourceObject();
-	const float Level = CombatInterface->GetPlayerLevel();
+	float Level = 1.f;
+	if (Spec.GetContext().GetSourceObject()->Implements<UCombatInterface>())
+	{
+		Level = ICombatInterface::Execute_GetPlayerLevel(Spec.GetContext().GetSourceObject());
+	}
 
 	// 計算して返却.
 	return 80.f + 2.f * Intelligence + 10.f * Level;

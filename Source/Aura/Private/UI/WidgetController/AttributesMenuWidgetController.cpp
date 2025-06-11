@@ -4,21 +4,25 @@
 #include "UI/WidgetController/AttributesMenuWidgetController.h"
 
 #include "AuraGameplayTags.h"
+#include "AbilitySystem/AuraAbilitySystemComponent.h"
 #include "AbilitySystem/AuraAttributeSet.h"
+#include "Player/AuraPlayerState.h"
 
 void UAttributesMenuWidgetController::BroadcastInitialValues()
 {
-	for (UAuraAttributeSet* AS = CastChecked<UAuraAttributeSet>(AttributeSet); auto& Pair : AS->TagToAttributes)
+	for (auto& Pair : GetAuraAS()->TagToAttributes)
 	{
 		BroadcastAttributeInfo(Pair.Key, Pair.Value());
 	}
+
+	OnAttributePointsChangedDelegate.Broadcast(GetAuraPS()->GetAttributePoints());
 }
 
 void UAttributesMenuWidgetController::BindCallbacksToDependencies()
 {
 	// TagToAttributesにはMenuに表示する全ての属性が含まれている.
 	// そのMapをループして、全ての属性にChangeDelegateを結びつける.
-	for (UAuraAttributeSet* AS = CastChecked<UAuraAttributeSet>(AttributeSet); auto& Pair : AS->TagToAttributes)
+	for (auto& Pair : GetAuraAS()->TagToAttributes)
 	{
 		AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(Pair.Value()).AddLambda(
 			[this,Pair](const FOnAttributeChangeData& Data)
@@ -27,6 +31,18 @@ void UAttributesMenuWidgetController::BindCallbacksToDependencies()
 			}
 		);
 	}
+
+	GetAuraPS()->OnAttributePointsChanged.AddLambda(
+		[this](const int32 InPoints)
+		{
+			OnAttributePointsChangedDelegate.Broadcast(InPoints);
+		}
+	);
+}
+
+void UAttributesMenuWidgetController::UpgradeAttribute(const FGameplayTag& AttributeTag)
+{
+	GetAuraASC()->UpgradeAttribute(AttributeTag);
 }
 
 void UAttributesMenuWidgetController::BroadcastAttributeInfo(const FGameplayTag& AttributeTag, const FGameplayAttribute& Attribute) const

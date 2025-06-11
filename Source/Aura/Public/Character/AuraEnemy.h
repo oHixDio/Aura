@@ -56,7 +56,7 @@ public:
 	// ====== ====== ====== ====== ====== ====== 
 	// CombatInterface member.
 public:
-	virtual float GetPlayerLevel() const override;
+	virtual float GetPlayerLevel_Implementation() const override;
 
 	virtual void Die() override;
 	

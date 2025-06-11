@@ -80,6 +80,8 @@ public:
 
 	virtual void PostGameplayEffectExecute(const FGameplayEffectModCallbackData& Data) override;
 
+	virtual void PostAttributeChange(const FGameplayAttribute& Attribute, float OldValue, float NewValue) override;
+
 	/*
 	 * GameplayTagとAttributeを関連付けるためのMap.
 	 * 新しいAttributeを作成したときに、コンストラクタで関連付けを怠らない。
@@ -298,8 +300,19 @@ public:
 	FGameplayAttributeData IncomingDamage;
 	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingDamage)
 
+	UPROPERTY(BlueprintReadOnly, Category = "Aura|Attribute")
+	FGameplayAttributeData IncomingXP;
+	ATTRIBUTE_ACCESSORS(UAuraAttributeSet, IncomingXP)
+
 private:
+	
+	bool bTopOffHealth = false;
+
+	bool bTopOffMana = false;
+
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 
 	void ShowFloatingDamageText(const FEffectProperties& Props, const float DamageValue);
+
+	void SendXPEvent(const FEffectProperties& Props) const;
 };

@@ -134,7 +134,7 @@ void AAuraEnemy::UnHighlight()
 	WeaponMesh->SetRenderCustomDepth(false);
 }
 
-float AAuraEnemy::GetPlayerLevel() const
+float AAuraEnemy::GetPlayerLevel_Implementation() const
 {
 	return Level;
 }

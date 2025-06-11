@@ -5,6 +5,8 @@
 
 #include "UI/Widget/AuraUserWidget.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
+#include "UI/WidgetController/SpellMenuWidgetController.h"
+#include "UI/WidgetController/AttributesMenuWidgetController.h"
 
 UOverlayWidgetController* AAuraHUD::GetOverlayWidgetControllerInstance(const FWidgetControllerParams& WidgetControllerParams)
 {
@@ -48,4 +50,16 @@ UAttributesMenuWidgetController* AAuraHUD::GetAttributesMenuWidgetControllerInst
 		AttributesMenuWidgetControllerInstance->BindCallbacksToDependencies();
 	}
 	return AttributesMenuWidgetControllerInstance;
+}
+
+USpellMenuWidgetController* AAuraHUD::GetSpellMenuWidgetControllerInstance(const FWidgetControllerParams& WidgetControllerParams)
+{
+	if (SpellWidgetControllerInstance == nullptr)
+	{
+		checkf(SpellMenuWidgetControllerClass, TEXT("SpellMenuWidgetControllerのクラスが設定されていません。BPから設定してください。"));
+		SpellWidgetControllerInstance = NewObject<USpellMenuWidgetController>(this, SpellMenuWidgetControllerClass);
+		SpellWidgetControllerInstance->SetWidgetControllerParams(WidgetControllerParams);
+		SpellWidgetControllerInstance->BindCallbacksToDependencies();
+	}
+	return SpellWidgetControllerInstance;
 }

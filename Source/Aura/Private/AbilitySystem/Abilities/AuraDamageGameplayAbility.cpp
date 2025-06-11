@@ -5,6 +5,44 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "AbilitySystem/AuraAttributeSet.h"
+
+float UAuraDamageGameplayAbility::GetCost(const float InLevel) const
+{
+	float Cost = 0.f;
+	if (const UGameplayEffect* CostEffect = GetCostGameplayEffect())
+	{
+		for (FGameplayModifierInfo Mod : CostEffect->Modifiers)
+		{
+			if (Mod.Attribute == UAuraAttributeSet::GetManaAttribute())
+			{
+				Mod.ModifierMagnitude.GetStaticMagnitudeIfPossible(InLevel, Cost);
+				break;
+			}
+		}
+	}
+	return Cost;
+}
+
+float UAuraDamageGameplayAbility::GetCooldown(const float InLevel) const
+{
+	float Cooldown = 0.f;
+	if (const UGameplayEffect* CooldownEffect = GetCooldownGameplayEffect())
+	{
+		CooldownEffect->DurationMagnitude.GetStaticMagnitudeIfPossible(InLevel, Cooldown);
+	}
+	return Cooldown;
+}
+
+float UAuraDamageGameplayAbility::GetDamage(const float InLevel) const
+{
+	return DamageTypes[DamageTag].GetValueAtLevel(InLevel);
+}
+
+FText UAuraDamageGameplayAbility::GetAbilityName() const
+{
+	return AbilityName;
+}
 
 void UAuraDamageGameplayAbility::CauseDamage(AActor* TargetActor)
 {
@@ -30,3 +68,4 @@ FTaggedMontage UAuraDamageGameplayAbility::GetRandomTaggedMontageFromArray(const
 	}
 	return FTaggedMontage();
 }
+

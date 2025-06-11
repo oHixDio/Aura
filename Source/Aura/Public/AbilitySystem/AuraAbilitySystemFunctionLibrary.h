@@ -8,8 +8,12 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "AuraAbilitySystemFunctionLibrary.generated.h"
 
+class UAbilityInfo;
+class AAuraHUD;
+struct FWidgetControllerParams;
 class UOverlayWidgetController;
 class UAttributesMenuWidgetController;
+class USpellMenuWidgetController;
 class UAbilitySystemComponent;
 /**
  * 
@@ -20,11 +24,17 @@ class AURA_API UAuraAbilitySystemFunctionLibrary : public UBlueprintFunctionLibr
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|WidgetController")
+	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
+	static bool MakeWidgetControllerParams(const UObject* WorldContextObject, FWidgetControllerParams& OutWCParams, AAuraHUD*& OutAuraHUD);
+	
+	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
 	static UOverlayWidgetController* GetOverlayWidgetController(const UObject* WorldContextObject);
 
-	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|WidgetController")
+	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
 	static UAttributesMenuWidgetController* GetAttributesMenuWidgetController(const UObject* WorldContextObject);
+	
+	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
+	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintCallable, Category = "AbilitySystemFunctionLibrary|Character")
 	static void InitializeDefaultAttributes(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level, UAbilitySystemComponent* AbilitySystemComponent);
@@ -32,8 +42,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "AbilitySystemFunctionLibrary|Character")
 	static void GiveDefaultAbilities(const UObject* WorldContextObject, UAbilitySystemComponent* AbilitySystemComponent, const ECharacterClass CharacterClass);
 
-	UFUNCTION(BlueprintCallable, Category = "AbilitySystemFunctionLibrary|DamageCalcuation")
+	UFUNCTION(BlueprintCallable, Category = "AbilitySystemFunctionLibrary|Info")
 	static UCharacterClassInfo* GetCharacterClassInfo(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintCallable, Category = "AbilitySystemFunctionLibrary|Info")
+	static UAbilityInfo* GetAbilityInfo(const UObject* WorldContextObject);
 
 	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|GameplayEffects")
 	static bool IsBlockedHIt(const FGameplayEffectContextHandle& EffectContextHandle);
@@ -54,5 +67,8 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|GameplayEffects")
 	static bool IsNotFriend(AActor* FirstActor, AActor* SecondActor);
+
+	UFUNCTION(BlueprintPure, Category = "AbilitySystemFunctionLibrary|GameplayEffects")
+	static int32 GetXPRewardForClassAndLevel(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level);
 };
 

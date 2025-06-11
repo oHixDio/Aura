@@ -7,6 +7,16 @@
 
 class UAttributeSet;
 class UAbilitySystemComponent;
+class AAuraPlayerController;
+class AAuraPlayerState;
+class UAuraAbilitySystemComponent;
+class UAuraAttributeSet;
+class UAbilityInfo;
+struct FAuraAbilityInfo;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnPlayerStatChangedSigneture, int32, NewValue);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAbilityInfoSignature, const FAuraAbilityInfo&, Info);
 
 USTRUCT(BlueprintType)
 struct FWidgetControllerParams
@@ -33,27 +43,56 @@ struct FWidgetControllerParams
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable, BlueprintType)
 class AURA_API UWidgetController : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(BlueprintAssignable, Category="Aura|Event")
+	FAbilityInfoSignature AbilityInfoDelegate;
+	
 	void SetWidgetControllerParams(const FWidgetControllerParams& WidgetControllerParams);
 
 	UFUNCTION(BlueprintCallable)
-	virtual void BroadcastInitialValues();
-	virtual void BindCallbacksToDependencies();
+	virtual void BroadcastInitialValues() { };
+	virtual void BindCallbacksToDependencies() { };
+	void BroadcastAbilityInfo();
+	
 protected:
-	UPROPERTY(BlueprintReadOnly, Category="Galaxy|UI")
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UAbilityInfo> AbilityInfo = nullptr;
+	
+	UPROPERTY(BlueprintReadOnly, Category="Aura|UI")
 	TObjectPtr<APlayerController> PlayerController{};
 
-	UPROPERTY(BlueprintReadOnly, Category="Galaxy|UI")
+	UPROPERTY(BlueprintReadOnly, Category="Aura|UI")
 	TObjectPtr<APlayerState> PlayerState{};
 
-	UPROPERTY(BlueprintReadOnly, Category="Galaxy|UI")
+	UPROPERTY(BlueprintReadOnly, Category="Aura|UI")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent{};
 
-	UPROPERTY(BlueprintReadOnly, Category="Galaxy|UI")
+	UPROPERTY(BlueprintReadOnly, Category="Aura|UI")
 	TObjectPtr<UAttributeSet> AttributeSet{};
+
+	AAuraPlayerController* GetAuraPC();
+	
+	AAuraPlayerState* GetAuraPS();
+	
+	UAuraAbilitySystemComponent* GetAuraASC();
+	
+	UAuraAttributeSet* GetAuraAS();
+
+private:
+	UPROPERTY()
+	TObjectPtr<AAuraPlayerController> AuraPlayerController{};
+
+	UPROPERTY()
+	TObjectPtr<AAuraPlayerState> AuraPlayerState{};
+
+	UPROPERTY()
+	TObjectPtr<UAuraAbilitySystemComponent> AuraAbilitySystemComponent{};
+
+	UPROPERTY()
+	TObjectPtr<UAuraAttributeSet> AuraAttributeSet{};
 };

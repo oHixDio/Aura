@@ -37,6 +37,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Attributes_Vital_Health = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Vital.Health"));
 	Instance.Attributes_Vital_Mana = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Vital.Mana"));
 
+	Instance.Attributes_Meta_IncomingXP = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Attributes.Meta.IncomingXP"));
+
 	/**
 	 * Input
 	 */
@@ -46,6 +48,8 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	Instance.Input_4 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.4"), FString("Input Tag for 4 key"));
 	Instance.Input_LMB = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.LMB"), FString("Input Tag for Left mouse button"));
 	Instance.Input_RMB = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.RMB"), FString("Input Tag for Right mouse button"));
+	Instance.Input_Passive_1 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.Passive.1"), FString("Input Tag for Passive Ability 1"));
+	Instance.Input_Passive_2 = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Input.Passive.2"), FString("Input Tag for Passive Ability 2"));
 
 	/**
 	 * Damage
@@ -95,7 +99,18 @@ void FAuraGameplayTags::InitializeNativeGameplayTags()
 	*/
 	Instance.Abilities_Attack = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Attack"), FString("Attack Abilities Tag"));
 	Instance.Abilities_Summon = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Summon"), FString("Summon Abilities Tag"));
+	Instance.Abilities_HitReact = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.HitReact"), FString("HitReact Abilities Tag"));
 	Instance.Abilities_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Fire.FireBolt"), FString("FireBolt Abilities Tag"));
+	Instance.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Lightning.Electrocute"), FString("Electrocute Abilities Tag"));
+
+	Instance.Abilities_Status_Locked = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Status.Locked"), FString("Abilities Status Tag Of Locked"));
+	Instance.Abilities_Status_Eligible = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Status.Eligible"), FString("Abilities Status Tag Of Eligible"));
+	Instance.Abilities_Status_UnLocked = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Status.UnLocked"), FString("Abilities Status Tag Of UnLocked"));
+	Instance.Abilities_Status_Equipped = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Status.Equipped"), FString("Abilities Status Tag Of Equipped"));
+
+	Instance.Abilities_Type_Offensive = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Type.Offensive"), FString("Abilities Type Tag Of Offensive"));
+	Instance.Abilities_Type_Passive = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Type.Passive"), FString("Abilities Type Tag Of Passive"));
+	Instance.Abilities_Type_None = UGameplayTagsManager::Get().AddNativeGameplayTag(FName("Abilities.Type.None"), FString("Abilities Type Tag Of None"));
 
 	/**
 	* Cooldown 

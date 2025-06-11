@@ -14,39 +14,56 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interaction/CombatInterface.h"
 
-UOverlayWidgetController* UAuraAbilitySystemFunctionLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
+bool UAuraAbilitySystemFunctionLibrary::MakeWidgetControllerParams(const UObject* WorldContextObject,FWidgetControllerParams& OutWCParams, AAuraHUD*& OutAuraHUD)
 {
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
 	{
-		if (AAuraHUD* HUD = PC->GetHUD<AAuraHUD>())
+		OutAuraHUD = PC->GetHUD<AAuraHUD>();
+		if (OutAuraHUD)
 		{
 			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
 			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
 			UAttributeSet* AS = PS->GetAttributeSet();
-			FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-			return HUD->GetOverlayWidgetControllerInstance(WidgetControllerParams);
+			OutWCParams.PlayerController = PC;
+			OutWCParams.PlayerState = PS;
+			OutWCParams.AbilitySystemComponent = ASC;
+			OutWCParams.AttributeSet = AS;
+			return true;
 		}
 	}
+	return false;
+}
 
+UOverlayWidgetController* UAuraAbilitySystemFunctionLibrary::GetOverlayWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WidgetControllerParams;
+	AAuraHUD* AuraHUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject, WidgetControllerParams, AuraHUD))
+	{
+		return AuraHUD->GetOverlayWidgetControllerInstance(WidgetControllerParams);
+	}
 	return nullptr;
 }
 
-UAttributesMenuWidgetController* UAuraAbilitySystemFunctionLibrary::GetAttributesMenuWidgetController(
-	const UObject* WorldContextObject)
+UAttributesMenuWidgetController* UAuraAbilitySystemFunctionLibrary::GetAttributesMenuWidgetController(const UObject* WorldContextObject)
 {
-	if (APlayerController* PC = UGameplayStatics::GetPlayerController(WorldContextObject, 0))
+	FWidgetControllerParams WidgetControllerParams;
+	AAuraHUD* AuraHUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject, WidgetControllerParams, AuraHUD))
 	{
-		if (AAuraHUD* HUD = PC->GetHUD<AAuraHUD>())
-		{
-			AAuraPlayerState* PS = PC->GetPlayerState<AAuraPlayerState>();
-			UAbilitySystemComponent* ASC = PS->GetAbilitySystemComponent();
-			UAttributeSet* AS = PS->GetAttributeSet();
-			FWidgetControllerParams WidgetControllerParams(PC, PS, ASC, AS);
-
-			return HUD->GetAttributesMenuWidgetControllerInstance(WidgetControllerParams);
-		}
+		return AuraHUD->GetAttributesMenuWidgetControllerInstance(WidgetControllerParams);
 	}
+	return nullptr;
+}
 
+USpellMenuWidgetController* UAuraAbilitySystemFunctionLibrary::GetSpellMenuWidgetController(const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WidgetControllerParams;
+	AAuraHUD* AuraHUD = nullptr;
+	if (MakeWidgetControllerParams(WorldContextObject, WidgetControllerParams, AuraHUD))
+	{
+		return AuraHUD->GetSpellMenuWidgetControllerInstance(WidgetControllerParams);
+	}
 	return nullptr;
 }
 
@@ -90,13 +107,17 @@ void UAuraAbilitySystemFunctionLibrary::GiveDefaultAbilities(const UObject* Worl
 	}
 	
 	const FCharacterClassDefaultInfo& ClassDefaultInfo = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
-	TScriptInterface<ICombatInterface> CombatActor = AbilitySystemComponent->GetAvatarActor();
-	if (CombatActor == nullptr) return;
-
-	// Class Default Abilities の付与.
-	for (auto AbilityClass : ClassDefaultInfo.Abilities)
+	
+	int32 PlayerLevel = 1;
+	if (AbilitySystemComponent->GetAvatarActor()->Implements<UCombatInterface>())
 	{
-		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityClass, CombatActor->GetPlayerLevel()));
+		PlayerLevel = ICombatInterface::Execute_GetPlayerLevel(AbilitySystemComponent->GetAvatarActor());
+	}
+	
+	// Class Default Abilities の付与.
+	for (const TSubclassOf<UGameplayAbility> AbilityClass : ClassDefaultInfo.Abilities)
+	{
+		AbilitySystemComponent->GiveAbility(FGameplayAbilitySpec(AbilityClass, PlayerLevel));
 	}
 }
 
@@ -104,6 +125,12 @@ UCharacterClassInfo* UAuraAbilitySystemFunctionLibrary::GetCharacterClassInfo(co
 {
 	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
 	return AuraGameMode ? AuraGameMode->CharacterClassInfo : nullptr;
+}
+
+UAbilityInfo* UAuraAbilitySystemFunctionLibrary::GetAbilityInfo(const UObject* WorldContextObject)
+{
+	const AAuraGameModeBase* AuraGameMode = Cast<AAuraGameModeBase>(UGameplayStatics::GetGameMode(WorldContextObject));
+	return AuraGameMode ? AuraGameMode->AbilityInfo : nullptr;
 }
 
 bool UAuraAbilitySystemFunctionLibrary::IsBlockedHIt(const FGameplayEffectContextHandle& EffectContextHandle) 
@@ -174,4 +201,18 @@ bool UAuraAbilitySystemFunctionLibrary::IsNotFriend(AActor* FirstActor, AActor* 
 	const bool BothEnemy = FirstIsEnemy && SecondIsEnemy;
 	const bool IsFriend = BothPlayer || BothEnemy; 
 	return !IsFriend;
+}
+
+int32 UAuraAbilitySystemFunctionLibrary::GetXPRewardForClassAndLevel(const UObject* WorldContextObject, const ECharacterClass CharacterClass, const float Level)
+{
+	const UCharacterClassInfo* CharacterClassInfo = GetCharacterClassInfo(WorldContextObject);
+	if (!IsValid(CharacterClassInfo))
+	{
+		return 0;
+	}
+
+	const FCharacterClassDefaultInfo& Info = CharacterClassInfo->GetClassDefaultInfo(CharacterClass);
+	const float XPReward = Info.XPReward.GetValueAtLevel(Level);
+
+	return static_cast<int32>(XPReward);
 }

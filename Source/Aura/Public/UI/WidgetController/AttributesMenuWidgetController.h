@@ -25,6 +25,12 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnAttributeInfoSignature OnAttributeInfoDelegate;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnPlayerStatChangedSigneture OnAttributePointsChangedDelegate;
+	
+	UFUNCTION(BlueprintCallable)
+	void UpgradeAttribute(const FGameplayTag& AttributeTag);
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAttributeInfo> AttributeInfo{};
